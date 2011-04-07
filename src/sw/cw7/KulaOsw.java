@@ -22,6 +22,7 @@ public class KulaOsw extends GLBaza {
 
     public static final int GLEBOKOSC_REKURENCJI = 7;
     public static final boolean OSOBNE_WEKTORY_NORMALNE = true;
+    public static final boolean OBETNIJ_POL_KULI = false;
 
     public static IntBuffer bufferFromArray(int[] array) {
         IntBuffer buf = BufferUtils.createIntBuffer(array.length);
@@ -66,13 +67,15 @@ public class KulaOsw extends GLBaza {
         }
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        gluLookAt(2, 2, 2, 0, 0, 0, 0, 1, 0);
+        gluLookAt(2.1f, 2.1f, 2.1f, 0, 0, 0, 0, 1, 0);
 
         glEnable(GL_DEPTH_TEST);
         glShadeModel(GL_SMOOTH);
-        glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1);
         setupLights();
-        setupClipPlane();
+        if (OBETNIJ_POL_KULI) {
+            setupClipPlane();
+            glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1);
+        }
 
         glColor3f(0, 0, 0);
         glClearColor(0, 0, 0, 0);
@@ -95,14 +98,14 @@ public class KulaOsw extends GLBaza {
             bufferFromArray(new float[]{1, 0, 0, 1}), // ambient
             bufferFromArray(new float[]{1, 0, 0, 1}), // diffuse
             bufferFromArray(new float[]{1, 1, 1, 1}), // specular
-            bufferFromArray(new float[]{20, 20, 20, 1}) // position
+            bufferFromArray(new float[]{-20, 20, 20, 1}) // position
     };
 
     FloatBuffer[] light1 = {
             bufferFromArray(new float[]{0, 0, 1, 1}), // ambient
             bufferFromArray(new float[]{0, 0, 1, 1}), // diffuse
             bufferFromArray(new float[]{1, 1, 1, 1}), // specular
-            bufferFromArray(new float[]{20, 20, 20, 1}) // position
+            bufferFromArray(new float[]{20, 20, -20, 1}) // position
     };
 
 
@@ -141,10 +144,10 @@ public class KulaOsw extends GLBaza {
         while (Mouse.next()) {
             if (Mouse.isButtonDown(0)) {
                 azimuth0 += Mouse.getDX();
-                elevation0 += Mouse.getDY();
+                elevation0 -= Mouse.getDY();
             } else if (Mouse.isButtonDown(1)) {
                 azimuth1 += Mouse.getDX();
-                elevation1 += Mouse.getDY();
+                elevation1 -= Mouse.getDY();
             }
         }
     }

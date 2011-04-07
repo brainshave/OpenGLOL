@@ -10,6 +10,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import org.lwjgl.opengl.GL15;
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 
@@ -34,18 +35,13 @@ public class Kula {
         return buf;
     }
 
-    private float[] tetrahedronVerts = {
-            1, 1, 1,
-            -1, -1, 1,
-            -1, 1, -1,
-            1, -1, -1
-    };
     private float[][] startVerts = {
-            {1, 1, 1},
-            {-1, -1, 1},
-            {-1, 1, -1},
-            {1, -1, -1}
+            normalize(new float[]{1, 1, 1}),
+            normalize(new float[]{-1, -1, 1}),
+            normalize(new float[]{-1, 1, -1}),
+            normalize(new float[]{1, -1, -1})
     };
+
     private float[][][] startTriangles = {
             {startVerts[0], startVerts[1], startVerts[2]},
             {startVerts[0], startVerts[1], startVerts[3]},
@@ -135,13 +131,13 @@ public class Kula {
 
     public Kula(int deepness, boolean nice) {
         this.nice = nice;
-        count = (int) Math.pow(startTriangles.length, deepness+2);
+        count = (int) Math.pow(startTriangles.length, deepness + 2);
         normsAndVerts = BufferUtils.createFloatBuffer(count * 6);
         normsAndVerts.rewind();
         for (float[][] triangle : startTriangles) {
             divideRecur(triangle, deepness);
         }
-        normsAndVerts.flip();
+        normsAndVerts.flip().rewind();
         count = normsAndVerts.remaining() / 6;
         bufferNames.rewind();
         glGenBuffers(bufferNames);
