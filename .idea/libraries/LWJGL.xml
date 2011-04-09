@@ -4,9 +4,13 @@
       <root url="file://$PROJECT_DIR$/../lwjgl-2.7.1/jar" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$PROJECT_DIR$/../lwjgl-docs-2.7.1.zip!/" />
+      <root url="jar://$PROJECT_DIR$/../lwjgl-2.7.1/lwjgl-docs-2.7.1.zip!/" />
     </JAVADOC>
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../lwjgl-2.7.1/lwjgl-source-2.7.1.zip!/src/java" />
+      <root url="jar://$PROJECT_DIR$/../lwjgl-2.7.1/lwjgl-source-2.7.1.zip!/src/generated" />
+      <root url="jar://$PROJECT_DIR$/../lwjgl-2.7.1/lwjgl-source-2.7.1.zip!/src/templates" />
+    </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/../lwjgl-2.7.1/jar" recursive="false" />
   </library>
 </component>
