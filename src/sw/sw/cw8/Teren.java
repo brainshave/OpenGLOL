@@ -2,6 +2,8 @@ package sw.sw.cw8;
 
 import org.lwjgl.BufferUtils;
 import sw.utils.GLBaza;
+import sw.utils.Light;
+import sw.utils.Material;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -9,6 +11,9 @@ import java.util.Random;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.gluLookAt;
+import static sw.utils.Utils.normalize;
+import static sw.utils.Utils.vector;
+import static sw.utils.Utils.vectorProduct;
 
 /**
  * Created by IntelliJ IDEA.
@@ -67,8 +72,8 @@ public class Teren extends GLBaza {
     final int DENSITY = 6;
     final int SIZE = (int) (Math.pow(2, DENSITY) + 1);
     double STEP = 2.0 / (SIZE - 1);
-    FloatBuffer terrain = BufferUtils.createFloatBuffer(SIZE * SIZE * 3);
-    IntBuffer indexes = BufferUtils.createIntBuffer(SIZE * SIZE * 3 * 2);
+    FloatBuffer terrain = BufferUtils.createFloatBuffer(SIZE * SIZE * 3 * 4 * 4);
+    //IntBuffer indexes = BufferUtils.createIntBuffer(SIZE * SIZE * 3 * 2);
     float[][][] verts = new float[SIZE][SIZE][];
 
     void setupTerrain(float[][] rect, int density) {
@@ -94,41 +99,44 @@ public class Teren extends GLBaza {
             }
         }
 
-        setHeights();
+        calcHeights();
 
         terrain.rewind();
-        for (float[][] col : verts) {
-            for (float[] v : col) {
-                terrain.put(v);
+        for (int x = 0; x < SIZE - 1; ++x) {
+            for (int z = 0; z < SIZE - 1; ++z) {
+                putTriangle(verts[x][z], verts[x + 1][z], verts[x][z + 1]);
+                putTriangle(verts[x + 1][z], verts[x + 1][z + 1], verts[x][z + 1]);
             }
         }
         terrain.flip();
-
-        indexes.rewind();
-        for (int x = 0; x < SIZE - 1; ++x) {
-            for (int z = 0; z < SIZE - 1; ++z) {
-                int start = x * SIZE + z;
-                indexes.put(new int[]{start, start + SIZE, start + 1});
-                indexes.put(new int[]{start + SIZE, start + SIZE + 1, start + 1});
-            }
-        }
-        indexes.flip();
     }
 
-    private void setHeights() {
+    void putTriangle(float[] v1, float[] v2, float[] v3) {
+        float[] a = normalize(vector(v1, v2));
+        float[] b = normalize(vector(v1, v3));
+        float[] norm = vectorProduct(b, a);
+        terrain.put(norm);
+        terrain.put(v3);
+        terrain.put(norm);
+        terrain.put(v2);
+        terrain.put(norm);
+        terrain.put(v1);
+    }
+
+    private void calcHeights() {
         for (int i = (SIZE - 1) / 2; i > 0; i /= 2) {
 
             for (int x = i; x < SIZE; x += 2 * i) { // zerowy rząd
-                verts[x][0][1] = between(verts[x-i][0], verts[x+i][0])[1];
+                verts[x][0][1] = between(verts[x - i][0], verts[x + i][0])[1];
             }
             for (int z = i; z < SIZE; z += 2 * i) { // zerowa kolumna
-                verts[0][z][1] = between(verts[0][z-i], verts[0][z+i])[1];
+                verts[0][z][1] = between(verts[0][z - i], verts[0][z + i])[1];
             }
             for (int x = i; x < SIZE; x += 2 * i) {
                 for (int z = i; z < SIZE; z += 2 * i) {
-                    verts[x][z+i][1] = between(verts[x-i][z+i], verts[x+i][z+i])[1];
-                    verts[x+i][z][1] = between(verts[x+i][z-i], verts[x+i][z+i])[1];
-                    verts[x][z][1] = between(verts[x-i][z-i], verts[x+i][z-i], verts[x-i][z+i], verts[x+i][z+i])[1];
+                    verts[x][z + i][1] = between(verts[x - i][z + i], verts[x + i][z + i])[1];
+                    verts[x + i][z][1] = between(verts[x + i][z - i], verts[x + i][z + i])[1];
+                    verts[x][z][1] = between(verts[x - i][z - i], verts[x + i][z - i], verts[x - i][z + i], verts[x + i][z + i])[1];
                 }
             }
         }
@@ -142,19 +150,23 @@ public class Teren extends GLBaza {
         return W(x) / 2.0;
     }
 
+    Light light = new Light(GL_LIGHT0, new float[][]{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, {10, 10, 0, 1}});
+
+    Material material = new Material(100, new float[][]{{0f, 0.1f, 0, 1}, {0, 0.75f, 0, 1}, {1, 1, 1, 1}});
+
     @Override
     protected void init() {
-        glEnable(GL_LINE_SMOOTH);
-        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//        glEnable(GL_LINE_SMOOTH);
+//        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+//        glEnable(GL_BLEND);
+//        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         float size = 1;
         if (width > height) {
             glFrustum(-size * (float) width / height,
-                    size * (float) width / height, -size, size, 2, 7);
+                    size * (float) width / height, -size, size, 2, 20);
         } else {
             glFrustum(-size, size, -size * (float) height / width,
                     size * (float) height / width, -size, size);
@@ -164,13 +176,18 @@ public class Teren extends GLBaza {
         gluLookAt(2.1f, 2.1f, 2.1f, 0, 0, 0, 0, 1, 0);
 
         glEnable(GL_DEPTH_TEST);
+        glShadeModel(GL_SMOOTH);
 
         glClearColor(0, 0, 0, 0);
 
         setupTerrain();
-        glInterleavedArrays(GL_V3F, 0, terrain);
+        glInterleavedArrays(GL_N3F_V3F, 0, terrain);
 
-        //glPolygonMode(GL_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        //glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1);
+        light.on();
+        material.set();
     }
 
     @Override
@@ -185,8 +202,8 @@ public class Teren extends GLBaza {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glPushMatrix();
         glRotatef(((System.currentTimeMillis() - start) % 7200) / 20f, 0, 1, 0);
-        //glDrawArrays(GL_TRIANGLES, 0, terrain.remaining() / 3);
-        glDrawElements(GL_TRIANGLES, indexes);
+        glDrawArrays(GL_TRIANGLES, 0, terrain.remaining() / 6);
+        //glDrawElements(GL_TRIANGLES, indexes);
         glPopMatrix();
     }
 
