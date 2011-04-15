@@ -19,7 +19,7 @@ import static org.lwjgl.util.glu.GLU.gluLookAt;
  * To change this template use File | Settings | File Templates.
  */
 public class Fly extends GLBaza {
-    final int DENSITY = 6;
+    final int DENSITY = 5;
 
     Terrain NW = new Terrain(DENSITY);
     Terrain N = new Terrain(NW, Terrain.Side.WEST);
@@ -98,14 +98,14 @@ public class Fly extends GLBaza {
         float size = 1;
         if (width > height) {
             glFrustum(-size * (float) width / height,
-                    size * (float) width / height, -size, size, 2, 20);
+                    size * (float) width / height, -size, size, 1, 7);
         } else {
             glFrustum(-size, size, -size * (float) height / width,
                     size * (float) height / width, -size, size);
         }
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        gluLookAt(0, 4f, -4f, 0, 0, 0, 0, 1, 0);
+        gluLookAt(0, 2.2f, -1.7f, 0, 1f, -1.5f, 0, 1, 0);
 
         glEnable(GL_DEPTH_TEST);
         glShadeModel(GL_SMOOTH);
