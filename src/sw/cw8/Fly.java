@@ -24,9 +24,8 @@ import static sw.utils.Utils.vectorProduct;
  * To change this template use File | Settings | File Templates.
  */
 public class Fly extends GLBaza {
-    final int DENSITY = 4;
+    final int DENSITY = 6;
 
-    Random rand = new Random();
     Terrain terrain;
     Terrain terrain2;
     Terrain terrain3;

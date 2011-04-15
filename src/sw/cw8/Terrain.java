@@ -189,13 +189,6 @@ public class Terrain {
             }
         }
 
-
-//        if (sides != null) {
-//            for (Origin origin : sides) {
-//                origin.side.copyHeights(origin.terrain.verts, verts);
-//            }
-//        }
-
         terrain = BufferUtils.createFloatBuffer(size * size * 3 * 16);
 
         terrain.rewind();
