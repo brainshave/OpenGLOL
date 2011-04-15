@@ -45,12 +45,6 @@ public class Teren extends GLBaza {
         ret[1] = (float) ((1.0 - 2.0 * Wx) * rand.nextDouble() + Wx * (a[1] + b[1]));
         return ret;
     }
-//
-//    float between(float[] a, float[] b) {
-//        double x = Math.abs(b[0] - a[0]) / 2.0;
-//        double Wx = W(x);
-//        return (float) ((1.0 - 2.0 * Wx) * rand.nextDouble() + Wx * (a[1] + b[1]));
-//    }
 
     float[] between(float[] north, float[] south, float[] west, float[] east) {
         float[] ret = between(north, south);
@@ -60,42 +54,12 @@ public class Teren extends GLBaza {
         return ret;
     }
 
-    float[][][] divideRect(float[][] rect) {
-        float[][][] ret = new float[4][][];
-        float[] north = between(rect[0], rect[1]);
-        float[] south = between(rect[2], rect[3]);
-        float[] west = between(rect[0], rect[2]);
-        float[] east = between(rect[1], rect[3]);
-        float[] centre = between(north, south, west, east);
-        ret[0] = new float[][]{rect[0], north, west, centre};
-        ret[1] = new float[][]{north, rect[1], centre, east};
-        ret[2] = new float[][]{west, centre, rect[2], south};
-        ret[3] = new float[][]{centre, east, south, rect[3]};
-        return ret;
-    }
-
     final int DENSITY = 6;
     final int SIZE = (int) (Math.pow(2, DENSITY) + 1);
     double STEP = 2.0 / (SIZE - 1);
     FloatBuffer terrain = BufferUtils.createFloatBuffer(SIZE * SIZE * 3 * 4 * 4);
     //IntBuffer indexes = BufferUtils.createIntBuffer(SIZE * SIZE * 3 * 2);
     float[][][] verts = new float[SIZE][SIZE][];
-
-    void setupTerrain(float[][] rect, int density) {
-        if (density == 0) {
-            putRect(terrain, rect);
-        } else {
-            for (float[][] quarter : divideRect(rect)) {
-                setupTerrain(quarter, density - 1);
-            }
-        }
-    }
-
-    void setupTerrainOld() {
-        terrain.rewind();
-        setupTerrain(startVerts, DENSITY);
-        terrain.flip();
-    }
 
     void setupTerrain() {
         for (int x = 0; x < SIZE; ++x) {
