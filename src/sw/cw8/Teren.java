@@ -1,4 +1,4 @@
-package sw.sw.cw8;
+package sw.cw8;
 
 import org.lwjgl.BufferUtils;
 import sw.utils.GLBaza;
@@ -6,7 +6,6 @@ import sw.utils.Light;
 import sw.utils.Material;
 
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.Random;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -41,17 +40,23 @@ public class Teren extends GLBaza {
         for (int i = 0; i < 3; i += 2) {
             ret[i] = (a[i] + b[i]) / 2;
         }
-        double x = Math.abs(b[0] - a[0]) / 2.0;
+        double x = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[2] - a[2])) / 2.0;
         double Wx = W(x);
         ret[1] = (float) ((1.0 - 2.0 * Wx) * rand.nextDouble() + Wx * (a[1] + b[1]));
         return ret;
     }
+//
+//    float between(float[] a, float[] b) {
+//        double x = Math.abs(b[0] - a[0]) / 2.0;
+//        double Wx = W(x);
+//        return (float) ((1.0 - 2.0 * Wx) * rand.nextDouble() + Wx * (a[1] + b[1]));
+//    }
 
     float[] between(float[] north, float[] south, float[] west, float[] east) {
         float[] ret = between(north, south);
         double x = Math.abs(east[0] - west[0]) / 2.0;
         double Wcx = Wc(x);
-        ret[1] = (float) ((1 - 4 * Wcx) * rand.nextDouble() + Wcx * (north[1] + south[1] + west[1] + east[1]));
+        ret[1] = (float) ((1.0 - 4.0 * Wcx) * rand.nextDouble() + Wcx * (north[1] + south[1] + west[1] + east[1]));
         return ret;
     }
 
