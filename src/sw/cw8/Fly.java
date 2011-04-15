@@ -1,20 +1,14 @@
 package sw.cw8;
 
-import org.lwjgl.BufferUtils;
 import sw.utils.GLBaza;
 import sw.utils.Light;
 import sw.utils.Material;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.gluLookAt;
-import static sw.utils.Utils.normalize;
-import static sw.utils.Utils.vector;
-import static sw.utils.Utils.vectorProduct;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,23 +20,24 @@ import static sw.utils.Utils.vectorProduct;
 public class Fly extends GLBaza {
     final int DENSITY = 6;
 
-    Terrain terrain;
-    Terrain terrain2;
-    Terrain terrain3;
+    Terrain NW = new Terrain(DENSITY);
+    Terrain N = new Terrain(NW, Terrain.Side.WEST);
+    Terrain NE = new Terrain(N, Terrain.Side.WEST);
+    Terrain E = new Terrain(NE, Terrain.Side.NORTH);
+    Terrain SE = new Terrain(E, Terrain.Side.NORTH);
+    Terrain S = new Terrain(SE, Terrain.Side.EAST);
+    Terrain SW = new Terrain(S, Terrain.Side.EAST);
+    Terrain W = new Terrain(SW, Terrain.Side.SOUTH, NW, Terrain.Side.NORTH);
 
+    Terrain C;
     {
-        terrain = new Terrain(DENSITY);
-
-        List<Origin> origins = new ArrayList<Origin>(1);
-        origins.add(new Origin(terrain, Terrain.Side.WEST));
-        terrain2 = new Terrain(origins);
-
-
-        origins = new ArrayList<Origin>(1);
-        origins.add(new Origin(terrain, Terrain.Side.EAST));
-        terrain3 = new Terrain(origins);
+        List<Origin> origins = new ArrayList<Origin>(4);
+        origins.add(new Origin(N, Terrain.Side.NORTH));
+        origins.add(new Origin(S, Terrain.Side.SOUTH));
+        origins.add(new Origin(E, Terrain.Side.EAST));
+        origins.add(new Origin(W, Terrain.Side.WEST));
+        C = new Terrain(origins);
     }
-
 
     Light light = new Light(GL_LIGHT0, new float[][]{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, {10, 10, 0, 1}});
     Material material = new Material(100, new float[][]{{0f, 0.1f, 0, 1}, {0, 0.75f, 0, 1}, {1, 1, 1, 1}});
@@ -66,7 +61,7 @@ public class Fly extends GLBaza {
         }
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        gluLookAt(0, 4f, 4f, 0, 0, 0, 0, 1, 0);
+        gluLookAt(0, 4f, -4f, 0, 0, 0, 0, 1, 0);
 
         glEnable(GL_DEPTH_TEST);
         glShadeModel(GL_SMOOTH);
@@ -92,11 +87,27 @@ public class Fly extends GLBaza {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glPushMatrix();
         glRotatef(((System.currentTimeMillis() - start) % 7200) / 20f, 0, 1, 0);
-        terrain.draw();
-        glTranslatef(2, 0, 0);
-        terrain2.draw();
-        glTranslatef(-4,0,0);
-        terrain3.draw();
+        glScalef(-1,1,1); // zamiana współrz. X
+
+        C.draw();
+
+        glTranslatef(-2, 0, 2);
+        NW.draw();
+        glTranslatef(2,0,0);
+        N.draw();
+        glTranslatef(2,0,0);
+        NE.draw();
+        glTranslatef(0,0,-2);
+        E.draw();
+        glTranslatef(0, 0, -2);
+        SE.draw();
+        glTranslatef(-2,0,0);
+        S.draw();
+        glTranslatef(-2,0,0);
+        SW.draw();
+        glTranslatef(0,0,2);
+        W.draw();
+
         glPopMatrix();
     }
 

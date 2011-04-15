@@ -3,6 +3,7 @@ package sw.cw8;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -55,7 +56,7 @@ public class Terrain {
 
             @Override
             protected int z(int i, int len) {
-                return len - 1;
+                return len-1;
             }
 
             @Override
@@ -119,13 +120,34 @@ public class Terrain {
     public final double step;
     private FloatBuffer terrain;
 
-    public Terrain(List<Origin> sides) {
-        Terrain firstOrigin = sides.get(0).terrain;
+    public Terrain(Terrain origin, Side side) {
+        List<Origin> origins = new ArrayList<Origin>(1);
+        origins.add(new Origin(origin, side));
+        this.density = origin.density;
+        this.size = origin.size;
+        this.step = origin.step;
+        this.verts = new float[size][size][];
+        setupTerrain(origins);
+    }
+
+    public Terrain(Terrain terrain1, Side side1, Terrain terrain2, Side side2) {
+        List<Origin> origins = new ArrayList<Origin>(1);
+        origins.add(new Origin(terrain1, side1));
+        origins.add(new Origin(terrain2, side2));
+        this.density = terrain1.density;
+        this.size = terrain1.size;
+        this.step = terrain1.step;
+        this.verts = new float[size][size][];
+        setupTerrain(origins);
+    }
+
+    public Terrain(List<Origin> origins) {
+        Terrain firstOrigin = origins.get(0).terrain;
         this.density = firstOrigin.density;
         this.size = firstOrigin.size;
         this.step = firstOrigin.step;
         this.verts = new float[size][size][];
-        setupTerrain(sides);
+        setupTerrain(origins);
     }
 
     public Terrain(int density) {
@@ -139,7 +161,11 @@ public class Terrain {
     private void setupTerrain(List<Origin> sides) {
         for (int x = 0; x < size; ++x) {
             for (int z = 0; z < size; ++z) {
-                verts[x][z] = new float[]{(float) (x * step - 1.0), rand.nextFloat(), (float) (z * step - 1.0)};
+                verts[x][z] = new float[]{
+                        (float) (x * step - 1.0),
+                        rand.nextFloat(),
+                        (float) (z * step - 1.0)
+                };
             }
         }
 
@@ -149,10 +175,10 @@ public class Terrain {
                 origin.side.copyHeights(origin.terrain.verts, verts);
                 switch (origin.side) {
                     case NORTH:
-                        topMargin = 1;
+                        bottomMargin = 1;
                         break;
                     case SOUTH:
-                        bottomMargin = 1;
+                        topMargin = 1;
                         break;
                     case EAST:
                         rightMargin = 1;
