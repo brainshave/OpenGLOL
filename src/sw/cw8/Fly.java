@@ -30,6 +30,7 @@ public class Fly extends GLBaza {
     Terrain W = new Terrain(SW, Terrain.Side.SOUTH, NW, Terrain.Side.NORTH);
 
     Terrain C;
+
     {
         List<Origin> origins = new ArrayList<Origin>(4);
         origins.add(new Origin(N, Terrain.Side.NORTH));
@@ -38,6 +39,12 @@ public class Fly extends GLBaza {
         origins.add(new Origin(W, Terrain.Side.WEST));
         C = new Terrain(origins);
     }
+
+    Terrain[][] grid = {
+            {NW, N, NE},
+            {W, C, E},
+            {SW, S, SE}
+    };
 
     Light light = new Light(GL_LIGHT0, new float[][]{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, {10, 10, 0, 1}});
     Material material = new Material(100, new float[][]{{0f, 0.1f, 0, 1}, {0, 0.75f, 0, 1}, {1, 1, 1, 1}});
@@ -86,27 +93,20 @@ public class Fly extends GLBaza {
     protected void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glPushMatrix();
-        glRotatef(((System.currentTimeMillis() - start) % 7200) / 20f, 0, 1, 0);
-        glScalef(-1,1,1); // zamiana współrz. X
-
-        C.draw();
+        //glRotatef(((System.currentTimeMillis() - start) % 7200) / 20f, 0, 1, 0);
+        glScalef(-1, 1, 1); // zamiana współrz. X
 
         glTranslatef(-2, 0, 2);
-        NW.draw();
-        glTranslatef(2,0,0);
-        N.draw();
-        glTranslatef(2,0,0);
-        NE.draw();
-        glTranslatef(0,0,-2);
-        E.draw();
-        glTranslatef(0, 0, -2);
-        SE.draw();
-        glTranslatef(-2,0,0);
-        S.draw();
-        glTranslatef(-2,0,0);
-        SW.draw();
-        glTranslatef(0,0,2);
-        W.draw();
+        for (int x = 0; x < 3; ++x) {
+            glPushMatrix();
+            for (int z = 0; z < 3; ++z) {
+                grid[x][z].draw();
+                glTranslatef(2, 0, 0);
+
+            }
+            glPopMatrix();
+            glTranslatef(0, 0, -2);
+        }
 
         glPopMatrix();
     }
