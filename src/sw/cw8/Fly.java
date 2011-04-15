@@ -21,18 +21,7 @@ import static sw.utils.Utils.vectorProduct;
  * Time: 11:04
  * To change this template use File | Settings | File Templates.
  */
-public class Teren extends GLBaza {
-    float[][] startVerts = {{-1, 0, -1}, {1, 0, -1}, {-1, 0, 1}, {1, 0, 1}};
-
-    void putRect(FloatBuffer fb, float[][] verts) {
-        // trojkat 1
-        for (int i = 2; i >= 0; --i)
-            fb.put(verts[i]);
-        // trojkat 2
-        for (int i = 1; i < 4; ++i)
-            fb.put(verts[i]);
-    }
-
+public class Fly extends GLBaza {
     Random rand = new Random();
 
     float[] between(float[] a, float[] b) {
@@ -64,7 +53,7 @@ public class Teren extends GLBaza {
     void setupTerrain() {
         for (int x = 0; x < SIZE; ++x) {
             for (int z = 0; z < SIZE; ++z) {
-                verts[x][z] = new float[]{(float) (x * STEP - 1.0), 0, (float) (z * STEP - 1.0)};
+                verts[x][z] = new float[]{(float) (x * STEP - 1.0), rand.nextFloat(), (float) (z * STEP - 1.0)};
             }
         }
 
@@ -185,6 +174,6 @@ public class Teren extends GLBaza {
     }
 
     public static void main(String[] args) {
-        new Teren().start();
+        new Fly().start();
     }
 }
