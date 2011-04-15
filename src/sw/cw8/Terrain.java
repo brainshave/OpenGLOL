@@ -6,6 +6,7 @@ import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Random;
 
+import static org.lwjgl.opengl.GL11.*;
 import static sw.utils.Utils.normalize;
 import static sw.utils.Utils.vector;
 import static sw.utils.Utils.vectorProduct;
@@ -17,9 +18,20 @@ import static sw.utils.Utils.vectorProduct;
  * Time: 14:49
  * To change this template use File | Settings | File Templates.
  */
+
+class Origin {
+    public final Terrain.Side side;
+    public final Terrain terrain;
+
+    Origin(Terrain terrain, Terrain.Side side) {
+        this.terrain = terrain;
+        this.side = side;
+    }
+}
+
 public class Terrain {
     public enum Side {
-        NORTH(0, 0, 1, 0) {
+        NORTH {
             @Override
             protected int x(int i, int len) {
                 return i;
@@ -35,7 +47,7 @@ public class Terrain {
                 return SOUTH;
             }
         },
-        SOUTH(0, 0, 0, 1) {
+        SOUTH {
             @Override
             protected int x(int i, int len) {
                 return i;
@@ -51,7 +63,7 @@ public class Terrain {
                 return NORTH;
             }
         },
-        EAST(0, 1, 0, 0) {
+        EAST {
             @Override
             protected int x(int i, int len) {
                 return 0;
@@ -68,7 +80,7 @@ public class Terrain {
             }
 
         },
-        WEST(1, 0, 0, 0) {
+        WEST {
             @Override
             protected int x(int i, int len) {
                 return len - 1;
@@ -85,13 +97,6 @@ public class Terrain {
             }
         };
 
-        Side(int leftMargin, int rightMargin, int topMargin, int bottomMargin) {
-            this.leftMargin = leftMargin;
-            this.rightMargin = rightMargin;
-            this.topMargin = topMargin;
-            this.bottomMargin = bottomMargin;
-        }
-
 
         void copyHeights(float[][][] from, float[][][] to) {
             int len = from.length;
@@ -105,18 +110,6 @@ public class Terrain {
         protected abstract int x(int i, int len);
 
         protected abstract Side opposite();
-
-        public final int leftMargin, rightMargin, topMargin, bottomMargin;
-    }
-
-    class Origin {
-        public final Side side;
-        public final Terrain terrain;
-
-        Origin(Terrain terrain, Side side) {
-            this.terrain = terrain;
-            this.side = side;
-        }
     }
 
     private Random rand = new Random();
@@ -151,36 +144,57 @@ public class Terrain {
         }
 
         int leftMargin = 0, rightMargin = 0, topMargin = 0, bottomMargin = 0;
-        for (Origin origin : sides) {
-            origin.side.copyHeights(origin.terrain.verts, verts);
-            if (origin.side.leftMargin > leftMargin) leftMargin = origin.side.leftMargin;
-            if (origin.side.rightMargin > rightMargin) rightMargin = origin.side.rightMargin;
-            if (origin.side.topMargin > topMargin) topMargin = origin.side.topMargin;
-            if (origin.side.bottomMargin > bottomMargin) bottomMargin = origin.side.bottomMargin;
+        if (sides != null) {
+            for (Origin origin : sides) {
+                origin.side.copyHeights(origin.terrain.verts, verts);
+                switch (origin.side) {
+                    case NORTH:
+                        topMargin = 1;
+                        break;
+                    case SOUTH:
+                        bottomMargin = 1;
+                        break;
+                    case EAST:
+                        rightMargin = 1;
+                        break;
+                    case WEST:
+                        leftMargin = 1;
+                        break;
+                }
+            }
         }
 
         for (int i = (size - 1) / 2; i > 0; i /= 2) {
 
             if (topMargin == 0) {
-                for (int x = i; x < size; x += 2 * i) { // zerowy rząd
+                for (int x = i; x < size - rightMargin; x += 2 * i) { // zerowy rząd
                     verts[x][0][1] = between(verts[x - i][0], verts[x + i][0])[1];
                 }
             }
 
             if (leftMargin == 0) {
-                for (int z = i; z < size; z += 2 * i) { // zerowa kolumna
+                for (int z = i; z < size - bottomMargin; z += 2 * i) { // zerowa kolumna
                     verts[0][z][1] = between(verts[0][z - i], verts[0][z + i])[1];
                 }
             }
 
             for (int x = i; x < size - rightMargin; x += 2 * i) {
                 for (int z = i; z < size - bottomMargin; z += 2 * i) {
-                    verts[x][z + i][1] = between(verts[x - i][z + i], verts[x + i][z + i])[1];
-                    verts[x + i][z][1] = between(verts[x + i][z - i], verts[x + i][z + i])[1];
+                    if (z + i < size - bottomMargin)
+                        verts[x][z + i][1] = between(verts[x - i][z + i], verts[x + i][z + i])[1];
+                    if (x + i < size - rightMargin)
+                        verts[x + i][z][1] = between(verts[x + i][z - i], verts[x + i][z + i])[1];
                     verts[x][z][1] = between(verts[x - i][z - i], verts[x + i][z - i], verts[x - i][z + i], verts[x + i][z + i])[1];
                 }
             }
         }
+
+
+//        if (sides != null) {
+//            for (Origin origin : sides) {
+//                origin.side.copyHeights(origin.terrain.verts, verts);
+//            }
+//        }
 
         terrain = BufferUtils.createFloatBuffer(size * size * 3 * 16);
 
@@ -195,7 +209,8 @@ public class Terrain {
     }
 
     public void draw() {
-
+        glInterleavedArrays(GL_N3F_V3F, 0, terrain);
+        glDrawArrays(GL_TRIANGLES, 0, terrain.remaining() / 6);
     }
 
     float[] between(float[] a, float[] b) {
@@ -217,7 +232,7 @@ public class Terrain {
         return ret;
     }
 
-     double W(double x) {
+    double W(double x) {
         return (1.0 - Math.cos(Math.pow(1.0 - x, 1.75) * Math.PI)) / 4.0;
     }
 
@@ -225,7 +240,7 @@ public class Terrain {
         return W(x) / 2.0;
     }
 
-     void putTriangle(float[] v1, float[] v2, float[] v3) {
+    void putTriangle(float[] v1, float[] v2, float[] v3) {
         float[] a = normalize(vector(v1, v2));
         float[] b = normalize(vector(v1, v3));
         float[] norm = vectorProduct(b, a);
