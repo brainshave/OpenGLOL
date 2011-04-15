@@ -1,5 +1,6 @@
 package sw.cw8;
 
+import org.lwjgl.input.Keyboard;
 import sw.utils.GLBaza;
 import sw.utils.Light;
 import sw.utils.Material;
@@ -46,6 +47,42 @@ public class Fly extends GLBaza {
             {SW, S, SE}
     };
 
+    protected void moveGridNorth() {
+        for (int row = grid.length - 1; row > 0; --row) {
+            for (int col = 0; col < grid[row].length; ++col) {
+                grid[row][col] = grid[row - 1][col];
+            }
+        }
+        grid[0][0] = new Terrain(grid[1][0], Terrain.Side.SOUTH);
+        for (int col = 1; col < grid[0].length; ++col) {
+            grid[0][col] = new Terrain(
+                    grid[0][col - 1], Terrain.Side.WEST,
+                    grid[1][col], Terrain.Side.SOUTH);
+        }
+    }
+
+    protected void moveGridSouth() {
+        for (int row = 0; row < grid.length - 1; ++row) {
+            for (int col = 0; col < grid[row].length; ++col) {
+                grid[row][col] = grid[row + 1][col];
+            }
+        }
+        grid[grid.length - 1][0] = new Terrain(grid[grid.length - 2][0], Terrain.Side.NORTH);
+        for (int col = 1; col < grid[0].length; ++col) {
+            grid[grid.length - 1][col] = new Terrain(
+                    grid[grid.length - 1][col - 1], Terrain.Side.WEST,
+                    grid[grid.length - 2][col], Terrain.Side.NORTH);
+        }
+    }
+
+    protected void moveGridEast() {
+
+    }
+
+    protected void moveGridWest() {
+
+    }
+
     Light light = new Light(GL_LIGHT0, new float[][]{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, {10, 10, 0, 1}});
     Material material = new Material(100, new float[][]{{0f, 0.1f, 0, 1}, {0, 0.75f, 0, 1}, {1, 1, 1, 1}});
 
@@ -84,10 +121,23 @@ public class Fly extends GLBaza {
 
     @Override
     protected void input() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        while (Keyboard.next()) {
+            if (Keyboard.getEventKeyState()) {
+                switch (Keyboard.getEventKey()) {
+                    case Keyboard.KEY_UP:
+                        moveGridNorth();
+                        break;
+                    case Keyboard.KEY_DOWN:
+                        moveGridSouth();
+                }
+            }
+        }
     }
 
     long start = System.currentTimeMillis();
+
+    int T = 1000;
+    float movement = 0;
 
     @Override
     protected void render() {
@@ -96,13 +146,12 @@ public class Fly extends GLBaza {
         //glRotatef(((System.currentTimeMillis() - start) % 7200) / 20f, 0, 1, 0);
         glScalef(-1, 1, 1); // zamiana współrz. X
 
-        glTranslatef(-2, 0, 2);
+        glTranslatef(-2, 0, 2f - movement);
         for (int x = 0; x < 3; ++x) {
             glPushMatrix();
             for (int z = 0; z < 3; ++z) {
                 grid[x][z].draw();
                 glTranslatef(2, 0, 0);
-
             }
             glPopMatrix();
             glTranslatef(0, 0, -2);
@@ -117,6 +166,11 @@ public class Fly extends GLBaza {
             Thread.sleep(16, 666);
         } catch (InterruptedException ex) {
         }
+        float newMovement = (((float)(System.currentTimeMillis() - start) % T) / T) * 2;
+        if(newMovement < movement) {
+            moveGridNorth();
+        }
+        movement = newMovement;
     }
 
     public static void main(String[] args) {
