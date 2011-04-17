@@ -82,7 +82,7 @@ public class Fly extends GLBaza {
                 grid[row][col] = grid[row][col - 1];
             }
         }
-        grid[0][0] = new Terrain(grid[1][0], Terrain.Side.EAST);
+        grid[0][0] = new Terrain(grid[0][1], Terrain.Side.EAST);
         for (int row = 1; row < grid.length; ++row) {
             grid[row][0] = new Terrain(
                     grid[row - 1][0], Terrain.Side.NORTH,
@@ -97,11 +97,11 @@ public class Fly extends GLBaza {
                 grid[row][col] = grid[row][col + 1];
             }
         }
-        grid[0][grid[0].length-1] = new Terrain(grid[0][grid[0].length-2], Terrain.Side.WEST);
+        grid[0][grid[0].length - 1] = new Terrain(grid[0][grid[0].length - 2], Terrain.Side.WEST);
         for (int row = 1; row < grid.length; ++row) {
-            grid[row][grid[0].length-1] = new Terrain(
-                    grid[row-1][grid[0].length-1], Terrain.Side.NORTH,
-                    grid[row][grid[0].length-2], Terrain.Side.WEST
+            grid[row][grid[0].length - 1] = new Terrain(
+                    grid[row - 1][grid[0].length - 1], Terrain.Side.NORTH,
+                    grid[row][grid[0].length - 2], Terrain.Side.WEST
             );
         }
     }
@@ -122,14 +122,12 @@ public class Fly extends GLBaza {
         float size = 1;
         if (width > height) {
             glFrustum(-size * (float) width / height,
-                    size * (float) width / height, -size, size, 1, 7);
+                    size * (float) width / height, -size, size, 1, 15);
         } else {
             glFrustum(-size, size, -size * (float) height / width,
                     size * (float) height / width, -size, size);
         }
         glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        gluLookAt(0, 2.2f, -1.7f, 0, 2f, -1.5f, 0, 1, 0);
 
         glEnable(GL_DEPTH_TEST);
         glShadeModel(GL_SMOOTH);
@@ -143,24 +141,29 @@ public class Fly extends GLBaza {
         material.set();
     }
 
+    float rotation = 0;
+    boolean rotateLeft;
+    boolean rotateRight;
+    float altitude = 3;
+    boolean goUp;
+    boolean goDown;
+
     @Override
     protected void input() {
         while (Keyboard.next()) {
-            if (Keyboard.getEventKeyState()) {
-                switch (Keyboard.getEventKey()) {
-                    case Keyboard.KEY_UP:
-                        moveGridNorth();
-                        break;
-                    case Keyboard.KEY_DOWN:
-                        moveGridSouth();
-                        break;
-                    case Keyboard.KEY_LEFT:
-                        moveGridWest();
-                        break;
-                    case Keyboard.KEY_RIGHT:
-                        moveGridEast();
-                        break;
-                }
+            switch (Keyboard.getEventKey()) {
+                case Keyboard.KEY_UP:
+                    goUp = Keyboard.getEventKeyState();
+                    break;
+                case Keyboard.KEY_DOWN:
+                    goDown = Keyboard.getEventKeyState();
+                    break;
+                case Keyboard.KEY_LEFT:
+                    rotateLeft = Keyboard.getEventKeyState();
+                    break;
+                case Keyboard.KEY_RIGHT:
+                    rotateRight = Keyboard.getEventKeyState();
+                    break;
             }
         }
     }
@@ -168,16 +171,34 @@ public class Fly extends GLBaza {
     long start = System.currentTimeMillis();
 
     int T = 1000;
-    float movement = 0;
+    float moveX;
+    float moveZ;
+    boolean fly = true;
+
+    double cameraDistance() {
+        return -3 - Math.sqrt(altitude);
+    }
+
+    double cameraX() {
+        return Math.sin(Math.toRadians(rotation)) * cameraDistance();
+    }
+    double cameraZ() {
+        return Math.cos(Math.toRadians(rotation)) * cameraDistance();
+    }
 
     @Override
     protected void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glPushMatrix();
-        //glRotatef(((System.currentTimeMillis() - start) % 7200) / 20f, 0, 1, 0);
-        glScalef(-1, 1, 1); // zamiana współrz. X
 
-        glTranslatef(-2 - movement, 0, 2);
+        glLoadIdentity();
+        gluLookAt((float) -cameraX(), altitude, (float) cameraZ(),
+                0, 2, 0,
+                0, 1, 0);
+        glTranslatef(moveX,0,-moveZ);
+
+        glScalef(-1, 1, 1); // zamiana współrz. X
+        glTranslatef(-2, 0, 2);
+
         for (int x = 0; x < 3; ++x) {
             glPushMatrix();
             for (int z = 0; z < 3; ++z) {
@@ -187,9 +208,9 @@ public class Fly extends GLBaza {
             glPopMatrix();
             glTranslatef(0, 0, -2);
         }
-
-        glPopMatrix();
     }
+
+    double step = 0.2;
 
     @Override
     protected void logic() {
@@ -197,11 +218,29 @@ public class Fly extends GLBaza {
             Thread.sleep(16, 666);
         } catch (InterruptedException ex) {
         }
-        float newMovement = (((float) (System.currentTimeMillis() - start) % T) / T) * 2;
-        if (newMovement < movement) {
-            moveGridEast();
+
+        altitude += goUp ? 0.1f : (goDown ? -0.1f : 0);
+        rotation += rotateLeft ? -1.5f : (rotateRight ? 1.5f : 0);
+
+        if (fly) {
+            moveX += Math.sin(Math.toRadians(rotation)) * step;
+            if (moveX > 2) {
+                moveGridEast();
+                moveX %= 2;
+            } else if (moveX < -2) {
+                moveGridWest();
+                moveX %= 2;
+            }
+
+            moveZ += Math.cos(Math.toRadians(rotation)) * step;
+            if (moveZ > 2) {
+                moveGridNorth();
+                moveZ %= 2;
+            } else if (moveZ < -2) {
+                moveGridSouth();
+                moveZ %= 2;
+            }
         }
-        movement = newMovement;
     }
 
     public static void main(String[] args) {
