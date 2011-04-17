@@ -5,9 +5,6 @@ import sw.utils.GLBaza;
 import sw.utils.Light;
 import sw.utils.Material;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.gluLookAt;
 
@@ -19,15 +16,16 @@ import static org.lwjgl.util.glu.GLU.gluLookAt;
  * To change this template use File | Settings | File Templates.
  */
 public class Fly extends GLBaza {
-    final int DENSITY = 4;
-    final int SIZE = 9;
+    final int DENSITY = 4; // gęstość (dokładność) płatów terenu
+    final int SIZE = 9; // rozmiar siatki płatów terenu
+    final static double STEP = 0.2; // przemieszczenie w jednej klatce
 
     Terrain[][] grid = new Terrain[SIZE][SIZE];
 
     {
         grid[0][0] = new Terrain(DENSITY);
-        for(int col = 1; col < SIZE; ++col) {
-            grid[0][col] = new Terrain(grid[0][col-1], Terrain.Side.WEST);
+        for (int col = 1; col < SIZE; ++col) {
+            grid[0][col] = new Terrain(grid[0][col - 1], Terrain.Side.WEST);
         }
 
         for (int row = 1; row < SIZE; ++row) {
@@ -105,11 +103,6 @@ public class Fly extends GLBaza {
 
     @Override
     protected void init() {
-//        glEnable(GL_LINE_SMOOTH);
-//        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-//        glEnable(GL_BLEND);
-//        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         float size = 1;
@@ -127,9 +120,6 @@ public class Fly extends GLBaza {
 
         glClearColor(0, 0, 0, 0);
 
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-        //glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, 1);
         light.on();
         material.set();
     }
@@ -137,7 +127,7 @@ public class Fly extends GLBaza {
     float rotation = 0;
     boolean rotateLeft;
     boolean rotateRight;
-    float altitude = 3;
+    float altitude = 2;
     boolean goUp;
     boolean goDown;
 
@@ -166,7 +156,7 @@ public class Fly extends GLBaza {
     boolean fly = true;
 
     double cameraDistance() {
-        return - SIZE - Math.sqrt(altitude);
+        return -SIZE - Math.sqrt(altitude);
     }
 
     double cameraX() {
@@ -188,7 +178,7 @@ public class Fly extends GLBaza {
         glTranslatef(moveX, 0, -moveZ);
 
         glScalef(-1, 1, 1); // zamiana współrz. X
-        glTranslatef(-SIZE+1, 0, SIZE-1);
+        glTranslatef(-SIZE + 1, 0, SIZE - 1);
 
         for (int x = 0; x < SIZE; ++x) {
             glPushMatrix();
@@ -201,8 +191,6 @@ public class Fly extends GLBaza {
         }
     }
 
-    double step = 0.2;
-
     @Override
     protected void logic() {
         try {
@@ -214,7 +202,7 @@ public class Fly extends GLBaza {
         rotation += rotateLeft ? -1.5f : (rotateRight ? 1.5f : 0);
 
         if (fly) {
-            moveX += Math.sin(Math.toRadians(rotation)) * step;
+            moveX += Math.sin(Math.toRadians(rotation)) * STEP;
             if (moveX > 2) {
                 moveGridEast();
                 moveX %= 2;
@@ -223,7 +211,7 @@ public class Fly extends GLBaza {
                 moveX %= 2;
             }
 
-            moveZ += Math.cos(Math.toRadians(rotation)) * step;
+            moveZ += Math.cos(Math.toRadians(rotation)) * STEP;
             if (moveZ > 2) {
                 moveGridNorth();
                 moveZ %= 2;
