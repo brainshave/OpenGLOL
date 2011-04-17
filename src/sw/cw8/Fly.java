@@ -75,13 +75,37 @@ public class Fly extends GLBaza {
         }
     }
 
-    protected void moveGridEast() {
-
-    }
 
     protected void moveGridWest() {
-
+        for (int col = grid[0].length - 1; col > 0; --col) {
+            for (int row = 0; row < grid.length; ++row) {
+                grid[row][col] = grid[row][col - 1];
+            }
+        }
+        grid[0][0] = new Terrain(grid[1][0], Terrain.Side.EAST);
+        for (int row = 1; row < grid.length; ++row) {
+            grid[row][0] = new Terrain(
+                    grid[row - 1][0], Terrain.Side.NORTH,
+                    grid[row][1], Terrain.Side.EAST
+            );
+        }
     }
+
+    protected void moveGridEast() {
+        for (int col = 0; col < grid[0].length - 1; ++col) {
+            for (int row = 0; row < grid.length; ++row) {
+                grid[row][col] = grid[row][col + 1];
+            }
+        }
+        grid[0][grid[0].length-1] = new Terrain(grid[0][grid[0].length-2], Terrain.Side.WEST);
+        for (int row = 1; row < grid.length; ++row) {
+            grid[row][grid[0].length-1] = new Terrain(
+                    grid[row-1][grid[0].length-1], Terrain.Side.NORTH,
+                    grid[row][grid[0].length-2], Terrain.Side.WEST
+            );
+        }
+    }
+
 
     Light light = new Light(GL_LIGHT0, new float[][]{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, {10, 10, 0, 1}});
     Material material = new Material(100, new float[][]{{0f, 0.1f, 0, 1}, {0, 0.75f, 0, 1}, {1, 1, 1, 1}});
@@ -105,7 +129,7 @@ public class Fly extends GLBaza {
         }
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        gluLookAt(0, 2.2f, -1.7f, 0, 1f, -1.5f, 0, 1, 0);
+        gluLookAt(0, 2.2f, -1.7f, 0, 2f, -1.5f, 0, 1, 0);
 
         glEnable(GL_DEPTH_TEST);
         glShadeModel(GL_SMOOTH);
@@ -129,6 +153,13 @@ public class Fly extends GLBaza {
                         break;
                     case Keyboard.KEY_DOWN:
                         moveGridSouth();
+                        break;
+                    case Keyboard.KEY_LEFT:
+                        moveGridWest();
+                        break;
+                    case Keyboard.KEY_RIGHT:
+                        moveGridEast();
+                        break;
                 }
             }
         }
@@ -146,7 +177,7 @@ public class Fly extends GLBaza {
         //glRotatef(((System.currentTimeMillis() - start) % 7200) / 20f, 0, 1, 0);
         glScalef(-1, 1, 1); // zamiana współrz. X
 
-        glTranslatef(-2, 0, 2f - movement);
+        glTranslatef(-2 - movement, 0, 2);
         for (int x = 0; x < 3; ++x) {
             glPushMatrix();
             for (int z = 0; z < 3; ++z) {
@@ -166,9 +197,9 @@ public class Fly extends GLBaza {
             Thread.sleep(16, 666);
         } catch (InterruptedException ex) {
         }
-        float newMovement = (((float)(System.currentTimeMillis() - start) % T) / T) * 2;
-        if(newMovement < movement) {
-            moveGridNorth();
+        float newMovement = (((float) (System.currentTimeMillis() - start) % T) / T) * 2;
+        if (newMovement < movement) {
+            moveGridEast();
         }
         movement = newMovement;
     }
