@@ -19,33 +19,26 @@ import static org.lwjgl.util.glu.GLU.gluLookAt;
  * To change this template use File | Settings | File Templates.
  */
 public class Fly extends GLBaza {
-    final int DENSITY = 5;
+    final int DENSITY = 4;
+    final int SIZE = 9;
 
-    Terrain NW = new Terrain(DENSITY);
-    Terrain N = new Terrain(NW, Terrain.Side.WEST);
-    Terrain NE = new Terrain(N, Terrain.Side.WEST);
-    Terrain E = new Terrain(NE, Terrain.Side.NORTH);
-    Terrain SE = new Terrain(E, Terrain.Side.NORTH);
-    Terrain S = new Terrain(SE, Terrain.Side.EAST);
-    Terrain SW = new Terrain(S, Terrain.Side.EAST);
-    Terrain W = new Terrain(SW, Terrain.Side.SOUTH, NW, Terrain.Side.NORTH);
-
-    Terrain C;
+    Terrain[][] grid = new Terrain[SIZE][SIZE];
 
     {
-        List<Origin> origins = new ArrayList<Origin>(4);
-        origins.add(new Origin(N, Terrain.Side.NORTH));
-        origins.add(new Origin(S, Terrain.Side.SOUTH));
-        origins.add(new Origin(E, Terrain.Side.EAST));
-        origins.add(new Origin(W, Terrain.Side.WEST));
-        C = new Terrain(origins);
-    }
+        grid[0][0] = new Terrain(DENSITY);
+        for(int col = 1; col < SIZE; ++col) {
+            grid[0][col] = new Terrain(grid[0][col-1], Terrain.Side.WEST);
+        }
 
-    Terrain[][] grid = {
-            {NW, N, NE},
-            {W, C, E},
-            {SW, S, SE}
-    };
+        for (int row = 1; row < SIZE; ++row) {
+            grid[row][0] = new Terrain(grid[row - 1][0], Terrain.Side.NORTH);
+            for (int col = 1; col < SIZE; ++col) {
+                grid[row][col] = new Terrain(
+                        grid[row - 1][col], Terrain.Side.NORTH,
+                        grid[row][col - 1], Terrain.Side.WEST);
+            }
+        }
+    }
 
     protected void moveGridNorth() {
         for (int row = grid.length - 1; row > 0; --row) {
@@ -122,7 +115,7 @@ public class Fly extends GLBaza {
         float size = 1;
         if (width > height) {
             glFrustum(-size * (float) width / height,
-                    size * (float) width / height, -size, size, 1, 15);
+                    size * (float) width / height, -size, size, 1, 30);
         } else {
             glFrustum(-size, size, -size * (float) height / width,
                     size * (float) height / width, -size, size);
@@ -168,20 +161,18 @@ public class Fly extends GLBaza {
         }
     }
 
-    long start = System.currentTimeMillis();
-
-    int T = 1000;
     float moveX;
     float moveZ;
     boolean fly = true;
 
     double cameraDistance() {
-        return -3 - Math.sqrt(altitude);
+        return - SIZE - Math.sqrt(altitude);
     }
 
     double cameraX() {
         return Math.sin(Math.toRadians(rotation)) * cameraDistance();
     }
+
     double cameraZ() {
         return Math.cos(Math.toRadians(rotation)) * cameraDistance();
     }
@@ -194,14 +185,14 @@ public class Fly extends GLBaza {
         gluLookAt((float) -cameraX(), altitude, (float) cameraZ(),
                 0, 2, 0,
                 0, 1, 0);
-        glTranslatef(moveX,0,-moveZ);
+        glTranslatef(moveX, 0, -moveZ);
 
         glScalef(-1, 1, 1); // zamiana współrz. X
-        glTranslatef(-2, 0, 2);
+        glTranslatef(-SIZE+1, 0, SIZE-1);
 
-        for (int x = 0; x < 3; ++x) {
+        for (int x = 0; x < SIZE; ++x) {
             glPushMatrix();
-            for (int z = 0; z < 3; ++z) {
+            for (int z = 0; z < SIZE; ++z) {
                 grid[x][z].draw();
                 glTranslatef(2, 0, 0);
             }
