@@ -111,7 +111,7 @@ public class Fly extends GLBaza {
                     size * (float) width / height, -size, size, 1, 30);
         } else {
             glFrustum(-size, size, -size * (float) height / width,
-                    size * (float) height / width, -size, size);
+                    size * (float) height / width, 1, 30);
         }
         glMatrixMode(GL_MODELVIEW);
 
@@ -198,8 +198,8 @@ public class Fly extends GLBaza {
         } catch (InterruptedException ex) {
         }
 
-        altitude += goUp ? 0.1f : (goDown ? -0.1f : 0);
-        rotation += rotateLeft ? -1.5f : (rotateRight ? 1.5f : 0);
+        altitude += goUp ? (goDown ? 0 : 0.1f) : (goDown ? -0.1f : 0);
+        rotation += rotateLeft ? (rotateRight ? 0 : -1.5f) : (rotateRight ? 1.5f : 0);
 
         if (fly) {
             moveX += Math.sin(Math.toRadians(rotation)) * STEP;
