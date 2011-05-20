@@ -124,6 +124,6 @@ animate = () ->
         drawScene()
 
 init()
-animate()
+#animate()
 
-#drawScene()
+drawScene()
