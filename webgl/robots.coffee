@@ -149,11 +149,72 @@ init = ->
     gl.clearColor(0,0,0,1)
     gl.enable(gl.DEPTH_TEST)
 
+rotateZ = (deg) ->
+    mat4.rotate(mvMatrix, degToRad(deg), [0,0,1])
 
-drawCube = -> gl.drawElements(gl.LINES, cube.indices.numItems, gl.UNSIGNED_SHORT, 0)
+rotateY = (deg) ->
+    mat4.rotate(mvMatrix, degToRad(deg), [0,1,0])
+
+translate = (x,y,z) ->
+    mat4.translate(mvMatrix, [x,y,z])
+
+scale = (x,y,z) ->
+    mat4.scale(mvMatrix, [x,y,z])
+
+drawCube = (size) ->
+    mvPushMatrix()
+    size = size / 2
+    scale(size, size, size)
+    setMatrixUniforms()
+    gl.drawElements(gl.LINES, cube.indices.numItems, gl.UNSIGNED_SHORT, 0)
+    mvPopMatrix()
+
+drawCubeWithSwing = (size, length, swing) ->
+    rotateY(swing)
+    mvPushMatrix()
+    scale(length / size, 1,1)
+    drawCube(size)
+    mvPopMatrix()
+    translate(length / 2 - size / 2, 0, 0)
+
+drawCubeForward = (size, length) ->
+    translate(length / 2 + size, 0,0)
+    drawCubeWithSwing(size, length, 0)
+
+drawCubeBackward = (size, length) ->
+    translate(length / 2 - size / 2, 0,0)
+    mvPushMatrix()
+    scale(length / size, 1,1)
+    drawCube(size)
+    mvPopMatrix()
+    translate(length / 2 + size, 0,0)
 
 drawBot = (degs) ->
-    [a, b, c, d, z] = []
+    lastIdx = degs.length-1
+    [a, b, c, d, swing, z] = (degs[x] for x in (if degs[lastIdx] == 1 then [0,1,2,3,4,lastIdx] else [2,3,0,1,4,lastIdx]))
+    mvPushMatrix()
+    translate(0,0,z)
+    drawCubeWithSwing(0.3, 1, swing)
+    rotateZ(180 - a)
+    drawCubeForward(0.3, 2)
+    rotateZ(b - 180)
+    drawCubeForward(0.3, 2)
+    rotateZ(a - b)
+    translate(0,0,-z)
+    drawCube(1)
+    translate(0,0,-z)
+    rotateZ(d - c - 180)
+    drawCubeBackward(0.3, 2)
+    rotateZ(180 - d)
+    drawCubeBackward(0.3, 2)
+    rotateZ(c - 180)
+    drawCubeBackward(0.3, 1)
+    mvPopMatrix()
+
+
+leftDeg = 11.25;
+rightDeg = 10.18;
+
 
 drawScene = ->
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
@@ -169,14 +230,9 @@ drawScene = ->
     setColor(1,1,1)
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.indices)
     gl.bindBuffer(gl.ARRAY_BUFFER, cube)
-
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cube.itemSize, gl.FLOAT, false, 0, 0)
-    drawCube = -> gl.drawElements(gl.LINES, cube.indices.numItems, gl.UNSIGNED_SHORT, 0)
-    drawCube()
 
-    mat4.translate(mvMatrix, [0.0, 3, 0.0])
-    setMatrixUniforms()
-    drawCube()
+    drawBot([90, 120, 30, 120, -leftDeg, 0, 1])
 
     # triangle
     #mat4.translate(mvMatrix, [-1.5, 0.0, -7.0])
