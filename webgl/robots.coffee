@@ -1,5 +1,6 @@
 gl = {}
 circles = {}
+cube = {}
 shaderProgram = {}
 pMatrix = mat4.create()
 mvMatrix = mat4.create()
@@ -9,6 +10,13 @@ rSquare = 0
 
 log = (message) ->
     alert(message)
+
+initIndicesBuffer = (indices) ->
+    buff = gl.createBuffer()
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buff)
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
+    buff.numItems = indices.length
+    buff
 
 initBuffer = (verts, itemSize, numItems) ->
     buff = gl.createBuffer()
@@ -125,10 +133,27 @@ init = ->
     initShaders()
 
     circles = (initWay(offset) for offset in [-1.0, 1.0])
+    cube = initBuffer([
+        -1, 1, 1,
+        -1, -1, 1,
+        1, 1, 1,
+        1, -1, 1,
+        1, 1, -1,
+        1, -1, -1,
+        -1, 1, -1,
+        -1, -1, -1
+    ], 3, 8)
+
+    cube.indices = initIndicesBuffer([0,1,2,3,4,5,6,7, 0,2,1,3,4,6,5,7, 0,6,2,4,3,5,1,7])
 
     gl.clearColor(0,0,0,1)
     gl.enable(gl.DEPTH_TEST)
 
+
+drawCube = -> gl.drawElements(gl.LINES, cube.indices.numItems, gl.UNSIGNED_SHORT, 0)
+
+drawBot = (degs) ->
+    [a, b, c, d, z] = []
 
 drawScene = ->
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
@@ -136,9 +161,23 @@ drawScene = ->
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix)
     mat4.identity(mvMatrix)
 
-    mat4.translate(mvMatrix, [0.0,-5.0,-15.0])
+    mat4.translate(mvMatrix, [0.0,-5.0,-25.0])
     setColor(0,1,0)
     drawBuffer(c, gl.LINE_LOOP) for c in circles
+    mat4.rotate(mvMatrix, degToRad(rTri), [0,1,0])
+    setMatrixUniforms()
+    setColor(1,1,1)
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.indices)
+    gl.bindBuffer(gl.ARRAY_BUFFER, cube)
+
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cube.itemSize, gl.FLOAT, false, 0, 0)
+    drawCube = -> gl.drawElements(gl.LINES, cube.indices.numItems, gl.UNSIGNED_SHORT, 0)
+    drawCube()
+
+    mat4.translate(mvMatrix, [0.0, 3, 0.0])
+    setMatrixUniforms()
+    drawCube()
+
     # triangle
     #mat4.translate(mvMatrix, [-1.5, 0.0, -7.0])
     #withRotation(rTri, -> drawBuffers(triangleVerts, triangleColors, gl.TRIANGLES))
@@ -150,7 +189,6 @@ drawScene = ->
 lastTime = 0
 animate = ->
     timeNow = new Date().getTime()
-    #rTri = (rTri + 1) % 360.0
     if lastTime != 0
         elapsed = timeNow - lastTime
         rTri += (90 * elapsed) / 1000.0
