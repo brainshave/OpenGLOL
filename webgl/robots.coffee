@@ -6,6 +6,9 @@ squareColors = {}
 shaderProgram = {}
 pMatrix = mat4.create()
 mvMatrix = mat4.create()
+mvMatrixStack = []
+rTri = 0
+rSquare = 0
 
 log = (message) ->
     alert(message)
@@ -34,6 +37,24 @@ drawBuffers = (verts, colors, mode) ->
     catch e
         log(e)
 
+mvPushMatrix = ->
+    copy = mat4.create()
+    mat4.set(mvMatrix, copy)
+    mvMatrixStack.push(copy)
+
+mvPopMatrix = ->
+    if mvMatrixStack.length == 0
+        throw "Empty mvMatrixStack!"
+    mvMatrix = mvMatrixStack.pop()
+
+degToRad = (degrees) ->
+    return degrees * Math.PI / 180
+
+withRotation = (degs, f) ->
+    mvPushMatrix()
+    mat4.rotate(mvMatrix, degToRad(degs), [0, 1, 0])
+    f()
+    mvPopMatrix()
 
 drawScene = ->
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
@@ -43,11 +64,11 @@ drawScene = ->
 
     # triangle
     mat4.translate(mvMatrix, [-1.5, 0.0, -7.0])
-    drawBuffers(triangleVerts, triangleColors, gl.TRIANGLES)
+    withRotation(rTri, -> drawBuffers(triangleVerts, triangleColors, gl.TRIANGLES))
 
     # square
     mat4.translate(mvMatrix, [3.0, 0.0, 0.0])
-    drawBuffers(squareVerts, squareColors, gl.TRIANGLE_STRIP)
+    withRotation(rSquare, -> drawBuffers(squareVerts, squareColors, gl.TRIANGLE_STRIP))
 
 initGL = (canvas) ->
     try
@@ -140,11 +161,20 @@ init = ->
     gl.clearColor(0,0,0,1)
     gl.enable(gl.DEPTH_TEST)
 
-animate = () ->
-    requestAnimationFrame(animate)
+lastTime = 0
+animate = ->
+    timeNow = new Date().getTime()
+    #rTri = (rTri + 1) % 360.0
+    if lastTime != 0
+        elapsed = timeNow - lastTime
+        rTri += (90 * elapsed) / 1000.0
+        rSquare += (75 * elapsed) / 1000.0
+    lastTime = timeNow
+
+tick = ->
+    requestAnimationFrame(tick)
     drawScene()
+    animate()
 
 init()
-#animate()
-
-drawScene()
+tick()
