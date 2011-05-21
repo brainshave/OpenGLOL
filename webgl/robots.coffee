@@ -1,8 +1,5 @@
 gl = {}
-triangleVerts = {}
-triangleColors = {}
-squareVerts = {}
-squareColors = {}
+circles = {}
 shaderProgram = {}
 pMatrix = mat4.create()
 mvMatrix = mat4.create()
@@ -25,13 +22,13 @@ setMatrixUniforms = ->
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix)
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix)
 
+setColor = (r,g,b) ->
+    gl.uniform4f(shaderProgram.vColorUniform, r,g,b, 1)
 
-drawBuffers = (verts, colors, mode) ->
+drawBuffer = (verts, mode) ->
     try
         gl.bindBuffer(gl.ARRAY_BUFFER, verts)
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, verts.itemSize, gl.FLOAT, false, 0, 0)
-        gl.bindBuffer(gl.ARRAY_BUFFER, colors)
-        gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, colors.itemSize, gl.FLOAT, false, 0, 0)
         setMatrixUniforms()
         gl.drawArrays(mode, 0, verts.numItems)
     catch e
@@ -56,19 +53,6 @@ withRotation = (degs, f) ->
     f()
     mvPopMatrix()
 
-drawScene = ->
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix)
-    mat4.identity(mvMatrix)
-
-    # triangle
-    mat4.translate(mvMatrix, [-1.5, 0.0, -7.0])
-    withRotation(rTri, -> drawBuffers(triangleVerts, triangleColors, gl.TRIANGLES))
-
-    # square
-    mat4.translate(mvMatrix, [3.0, 0.0, 0.0])
-    withRotation(rSquare, -> drawBuffers(squareVerts, squareColors, gl.TRIANGLE_STRIP))
 
 initGL = (canvas) ->
     try
@@ -122,44 +106,46 @@ initShaders = ->
     shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition")
     gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute)
 
-    shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor")
-    gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute)
-
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix")
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix")
+    shaderProgram.vColorUniform = gl.getUniformLocation(shaderProgram, "vColor")
+
+R = 10.0
+WAY_DENSITY = 200
+
+initWay = (offset)->
+    verts = ([(R+offset) * Math.cos(t), 0.0, (R+offset) * Math.sin(t)] for t in (
+                   (Math.PI * 2 * i) / WAY_DENSITY for i in [0...WAY_DENSITY])).reduce(
+                        (prev, curr, index, array) -> prev.concat(curr))
+    initBuffer(verts, 3, verts.length / 3)
 
 init = ->
     canvas = document.getElementById('robot_canvas')
     initGL(canvas)
     initShaders()
 
-    triangleVerts = initBuffer([
-        0.0, 1.0, 0.0,
-        -1.0, -1.0, 0.0,
-        1.0, -1.0, 0.0
-    ], 3, 3)
-    triangleColors = initBuffer([
-        1.0, 0.0, 0.0, 1.0,
-        0.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 1.0
-    ], 4, 3)
-
-    squareVerts = initBuffer([
-        1.0, 1.0, 0.0,
-        -1.0, 1.0, 0.0,
-        1.0, -1.0, 0.0,
-        -1.0, -1.0, 0.0
-    ], 3, 4)
-    squareColors = initBuffer([
-        1.0, 0.0, 0.0, 1.0,
-        0.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 1.0,
-        1.0, 1.0, 0.0, 0.5
-    ], 4, 4)
-
+    circles = (initWay(offset) for offset in [-1.0, 1.0])
 
     gl.clearColor(0,0,0,1)
     gl.enable(gl.DEPTH_TEST)
+
+
+drawScene = ->
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix)
+    mat4.identity(mvMatrix)
+
+    mat4.translate(mvMatrix, [0.0,-5.0,-15.0])
+    setColor(0,1,0)
+    drawBuffer(c, gl.LINE_LOOP) for c in circles
+    # triangle
+    #mat4.translate(mvMatrix, [-1.5, 0.0, -7.0])
+    #withRotation(rTri, -> drawBuffers(triangleVerts, triangleColors, gl.TRIANGLES))
+
+    # square
+    #mat4.translate(mvMatrix, [3.0, 0.0, 0.0])
+    #withRotation(rSquare, -> drawBuffers(squareVerts, squareColors, gl.TRIANGLE_STRIP))
 
 lastTime = 0
 animate = ->
@@ -177,4 +163,5 @@ tick = ->
     animate()
 
 init()
+#drawScene()
 tick()
