@@ -1,4 +1,4 @@
-gl = {}
+gl = undefined
 circle = {}
 cube = {}
 eye = {}
@@ -12,7 +12,7 @@ rTri = 0
 rSquare = 0
 
 log = (message) ->
-    alert(message)
+    #alert(message)
 
 initIndicesBuffer = (indices) ->
     buff = gl.createBuffer()
@@ -65,8 +65,7 @@ initGL = (canvas) ->
         gl.viewportWidth = canvas.width
         gl.viewportHeight = canvas.height
     finally
-        if gl is {}
-            log("Can't init WebGL")
+        if not gl then log("Can't init WebGL")
 
 getShader = (id) ->
     shaderScript = document.getElementById(id)
@@ -331,7 +330,7 @@ drawScene = ->
     mat4.identity(mvMatrix)
 
     # moving away from eye
-    mat4.translate(mvMatrix, [0.0,-5.0,-25.0])
+    mat4.translate(mvMatrix, [0.0,-2.8,-18.0])
     retellPosition()
     setColor(0,1,0)
 
@@ -359,6 +358,7 @@ drawScene = ->
         rotateY(-90)
         drawBot(figure, true)
         mvPopMatrix()
+    gl.flush()
 
 tick = ->
     requestAnimationFrame(tick)
