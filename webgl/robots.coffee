@@ -1,6 +1,7 @@
 gl = {}
-circles = {}
+circle = {}
 cube = {}
+eye = {}
 shaderProgram = {}
 pMatrix = mat4.create()
 mvMatrix = mat4.create()
@@ -26,20 +27,15 @@ initBuffer = (verts, itemSize, numItems) ->
     buff.numItems = numItems
     buff
 
-setMatrixUniforms = ->
+retellPosition = ->
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix)
 
 setColor = (r,g,b) ->
     gl.uniform4f(shaderProgram.vColorUniform, r,g,b, 1)
 
-drawBuffer = (verts, mode) ->
-    try
-        gl.bindBuffer(gl.ARRAY_BUFFER, verts)
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, verts.itemSize, gl.FLOAT, false, 0, 0)
-        setMatrixUniforms()
-        gl.drawArrays(mode, 0, verts.numItems)
-    catch e
-        log(e)
+changeBuffer = (buff) ->
+    gl.bindBuffer(gl.ARRAY_BUFFER, buff)
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, buff.itemSize, gl.FLOAT, false, 0, 0)
 
 mvPushMatrix = ->
     copy = mat4.create()
@@ -117,21 +113,22 @@ initShaders = ->
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix")
     shaderProgram.vColorUniform = gl.getUniformLocation(shaderProgram, "vColor")
 
-R = 10.0
-WAY_DENSITY = 200
 
-initWay = (offset)->
-    verts = ([(R+offset) * Math.cos(t), 0.0, (R+offset) * Math.sin(t)] for t in (
-                   (Math.PI * 2 * i) / WAY_DENSITY for i in [0...WAY_DENSITY])).reduce(
+initCircle = (r, density)->
+    verts = ([r * Math.cos(t), 0.0, r * Math.sin(t)] for t in (
+                   (Math.PI * 2 * i) / density for i in [0...density])).reduce(
                         (prev, curr, index, array) -> prev.concat(curr))
     initBuffer(verts, 3, verts.length / 3)
+
 
 init = ->
     canvas = document.getElementById('robot_canvas')
     initGL(canvas)
     initShaders()
 
-    circles = (initWay(offset) for offset in [-1.0, 1.0])
+    circle = initCircle(9, 50)
+    eye = initCircle(0.15, 10)
+
     cube = initBuffer([
         -1, 1, 1,
         -1, -1, 1,
@@ -164,7 +161,7 @@ drawCube = (size) ->
     mvPushMatrix()
     size = size / 2
     scale(size, size, size)
-    setMatrixUniforms()
+    retellPosition()
     gl.drawElements(gl.LINES, cube.indices.numItems, gl.UNSIGNED_SHORT, 0)
     mvPopMatrix()
 
@@ -251,13 +248,23 @@ drawScene = ->
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix)
     mat4.identity(mvMatrix)
 
+    # moving away from eye
     mat4.translate(mvMatrix, [0.0,-5.0,-25.0])
+    retellPosition()
     setColor(0,1,0)
-    drawBuffer(c, gl.LINE_LOOP) for c in circles
+
+    # drawing circles on the floor
+    changeBuffer(circle)
+    gl.drawArrays(gl.LINE_LOOP, 0, circle.numItems)
+    mvPushMatrix()
+    scale(11/9, 1, 11/9)
+    retellPosition()
+    gl.drawArrays(gl.LINE_LOOP, 0, circle.numItems)
+    mvPopMatrix()
+
+    # will paint some cubes
     setColor(1,1,1)
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.indices)
-    gl.bindBuffer(gl.ARRAY_BUFFER, cube)
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cube.itemSize, gl.FLOAT, false, 0, 0)
+    changeBuffer(cube)
 
     figure = botFigureInTime()
     rotateY(rotation)
@@ -268,14 +275,6 @@ drawScene = ->
         rotateY(-90)
         drawBot(figure)
         mvPopMatrix()
-
-animate = ->
-    timeNow = new Date().getTime()
-    if lastTime != 0
-        elapsed = timeNow - lastTime
-        rTri += (90 * elapsed) / 1000.0
-        rSquare += (75 * elapsed) / 1000.0
-    lastTime = timeNow
 
 tick = ->
     requestAnimationFrame(tick)
