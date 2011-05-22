@@ -254,7 +254,7 @@ drawCubeBackward = (size, length) ->
     mvPopMatrix()
     translate(length / 2 + size, 0,0)
 
-drawBot = (degs) ->
+drawBot = (degs, happy) ->
     lastIdx = degs.length-1
     [a, b, c, d, swing, z] = (degs[x] for x in (if degs[lastIdx] == 1 then [0,1,2,3,4,lastIdx] else [2,3,0,1,4,lastIdx]))
     mvPushMatrix()
@@ -267,7 +267,7 @@ drawBot = (degs) ->
     rotateZ(a - b)
     translate(0,0,-z)
     drawCube(1)
-    drawFace(true)
+    drawFace(happy)
     changeBuffer(cube)
     setColor(1,1,1,1)
     translate(0,0,-z)
@@ -277,6 +277,16 @@ drawBot = (degs) ->
     drawCubeBackward(0.3, 2)
     rotateZ(c - 180)
     drawCubeBackward(0.3, 1)
+    mvPopMatrix()
+
+sadBotTerm = 15000
+
+sadBot = ->
+    mvPushMatrix()
+    scale(2,2,2)
+    rot = -((new Date().getTime() - start) % sadBotTerm) * 360 / sadBotTerm
+    rotateY(rot)
+    drawBot([0,90, 0, 90, 0,0,-1], false)
     mvPopMatrix()
 
 
@@ -338,6 +348,8 @@ drawScene = ->
     setColor(1,1,1)
     changeBuffer(cube)
 
+    sadBot()
+
     figure = botFigureInTime()
     rotateY(rotation)
     for i in [0...8]
@@ -345,7 +357,7 @@ drawScene = ->
         mvPushMatrix()
         translate(10, 0.15, 0)
         rotateY(-90)
-        drawBot(figure)
+        drawBot(figure, true)
         mvPopMatrix()
 
 tick = ->
