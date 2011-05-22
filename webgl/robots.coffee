@@ -227,27 +227,19 @@ rotation = 180
 rotStep = 21.43
 term = 1000
 botFigureInTime = () ->
-    #final float moment = (((System.currentTimeMillis() - start) % term) * sequence.length) / term;
     moment = (((new Date().getTime() - start) % term) * sequence.length) / term
-    #final int i = (int) Math.floor(moment);
     i = Math.floor(moment)
-    #final int i2 = (i + 1) % sequence.length;
     i2 = (i + 1) % sequence.length
-    #float amount = moment - i;
     amount = moment - i
-    #float[] degs = new float[seqlength];
     degs = []
-    #for (int d = 0; d < 4; ++d) {
     for d in [0...4]
         degs[d] = sequence[i][d] * (1 - amount) + sequence[i2][d] * amount
-    #}
+
     degs[4] = sequence[i][4] * (1 - amount) + amount * sequence[i][5]
-    #
     degs[seqlength - 1] = sequence[i][seqlength - 1];
-    #if (sequence[i][seqlength - 1] != sequence[last_i][seqlength - 1]) {
+
     if sequence[i][seqlength - 1] != sequence[last_i][seqlength - 1]
         rotation += rotStep;
-    #}
     last_i = i;
     degs
 
@@ -277,14 +269,6 @@ drawScene = ->
         drawBot(figure)
         mvPopMatrix()
 
-    # triangle
-    #mat4.translate(mvMatrix, [-1.5, 0.0, -7.0])
-    #withRotation(rTri, -> drawBuffers(triangleVerts, triangleColors, gl.TRIANGLES))
-
-    # square
-    #mat4.translate(mvMatrix, [3.0, 0.0, 0.0])
-    #withRotation(rSquare, -> drawBuffers(squareVerts, squareColors, gl.TRIANGLE_STRIP))
-
 animate = ->
     timeNow = new Date().getTime()
     if lastTime != 0
@@ -295,9 +279,7 @@ animate = ->
 
 tick = ->
     requestAnimationFrame(tick)
-
     drawScene()
 
 init()
-#drawScene()
 tick()
