@@ -27,7 +27,6 @@ initBuffer = (verts, itemSize, numItems) ->
     buff
 
 setMatrixUniforms = ->
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix)
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix)
 
 setColor = (r,g,b) ->
@@ -215,9 +214,47 @@ drawBot = (degs) ->
 leftDeg = 11.25;
 rightDeg = 10.18;
 
+sequence = [[90, 120, 30, 120, -leftDeg, 0, 1],
+            [76, 180, 30, 60, 0, leftDeg, 1],
+            [30, 120, 90, 120, -rightDeg, 0, -1],
+            [30, 60, 90, 180, 0, rightDeg, -1]]
+
+seqlength = sequence[0].length
+
+start = new Date().getTime()
+last_i = 0
+rotation = 180
+rotStep = 21.43
+term = 1000
+botFigureInTime = () ->
+    #final float moment = (((System.currentTimeMillis() - start) % term) * sequence.length) / term;
+    moment = (((new Date().getTime() - start) % term) * sequence.length) / term
+    #final int i = (int) Math.floor(moment);
+    i = Math.floor(moment)
+    #final int i2 = (i + 1) % sequence.length;
+    i2 = (i + 1) % sequence.length
+    #float amount = moment - i;
+    amount = moment - i
+    #float[] degs = new float[seqlength];
+    degs = []
+    #for (int d = 0; d < 4; ++d) {
+    for d in [0...4]
+        degs[d] = sequence[i][d] * (1 - amount) + sequence[i2][d] * amount
+    #}
+    degs[4] = sequence[i][4] * (1 - amount) + amount * sequence[i][5]
+    #
+    degs[seqlength - 1] = sequence[i][seqlength - 1];
+    #if (sequence[i][seqlength - 1] != sequence[last_i][seqlength - 1]) {
+    if sequence[i][seqlength - 1] != sequence[last_i][seqlength - 1]
+        rotation += rotStep;
+    #}
+    last_i = i;
+    degs
+
 
 drawScene = ->
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix)
     mat4.identity(mvMatrix)
@@ -225,14 +262,20 @@ drawScene = ->
     mat4.translate(mvMatrix, [0.0,-5.0,-25.0])
     setColor(0,1,0)
     drawBuffer(c, gl.LINE_LOOP) for c in circles
-    mat4.rotate(mvMatrix, degToRad(rTri), [0,1,0])
-    setMatrixUniforms()
     setColor(1,1,1)
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.indices)
     gl.bindBuffer(gl.ARRAY_BUFFER, cube)
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cube.itemSize, gl.FLOAT, false, 0, 0)
 
-    drawBot([90, 120, 30, 120, -leftDeg, 0, 1])
+    figure = botFigureInTime()
+    rotateY(rotation)
+    for i in [0...8]
+        rotateY(45)
+        mvPushMatrix()
+        translate(10, 0.15, 0)
+        rotateY(-90)
+        drawBot(figure)
+        mvPopMatrix()
 
     # triangle
     #mat4.translate(mvMatrix, [-1.5, 0.0, -7.0])
@@ -242,7 +285,6 @@ drawScene = ->
     #mat4.translate(mvMatrix, [3.0, 0.0, 0.0])
     #withRotation(rSquare, -> drawBuffers(squareVerts, squareColors, gl.TRIANGLE_STRIP))
 
-lastTime = 0
 animate = ->
     timeNow = new Date().getTime()
     if lastTime != 0
@@ -253,8 +295,8 @@ animate = ->
 
 tick = ->
     requestAnimationFrame(tick)
+
     drawScene()
-    animate()
 
 init()
 #drawScene()
