@@ -2,6 +2,8 @@ gl = {}
 circle = {}
 cube = {}
 eye = {}
+smile = {}
+mask = {}
 shaderProgram = {}
 pMatrix = mat4.create()
 mvMatrix = mat4.create()
@@ -127,7 +129,21 @@ init = ->
     initShaders()
 
     circle = initCircle(9, 50)
-    eye = initCircle(0.15, 10)
+    eye = initCircle(0.15, 8)
+
+    smile = initBuffer([
+        0, 0, -0.3,
+        0, -0.2, -0.1,
+        0, -0.2, 0.1,
+        0, 0, 0.3
+    ], 3, 4)
+
+    mask = initBuffer([
+        0, 0.5, 0.5,
+        0, 0.5, -0.5,
+        0, -0.5, 0.5,
+        0, -0.5, -0.5
+    ], 3, 4)
 
     cube = initBuffer([
         -1, 1, 1,
@@ -151,11 +167,64 @@ rotateZ = (deg) ->
 rotateY = (deg) ->
     mat4.rotate(mvMatrix, degToRad(deg), [0,1,0])
 
+rotateX = (deg) ->
+    mat4.rotate(mvMatrix, degToRad(deg), [1,0,0])
+
 translate = (x,y,z) ->
     mat4.translate(mvMatrix, [x,y,z])
 
 scale = (x,y,z) ->
     mat4.scale(mvMatrix, [x,y,z])
+
+drawFace = (happy) ->
+    #glPushMatrix();
+    mvPushMatrix()
+    #glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    #glTranslatef(-0.5f, 0.25f, 0.25f);
+    translate(-0.5, 0.25, 0.25)
+    rotateZ(90)
+    retellPosition()
+    #glColor3f(0, 1, 1);
+    setColor(0,1,1,1)
+    changeBuffer(eye)
+    #sphere.draw(0.15f, 10, 10);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, eye.numItems)
+    #glTranslatef(0, 0, -0.5f);
+    translate(0,0,-0.5)
+    retellPosition()
+    #sphere.draw(0.15f, 10, 10);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, eye.numItems)
+    rotateZ(-90)
+    #glTranslatef(0, -0.25f, 0.25f);
+    #glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    #glTranslatef(0.15f, 0,0);
+    translate(0.15, -0.25, 0.25)
+    retellPosition()
+    #glColor3f(0,0,0);
+    setColor(0,0,0,1)
+    #glInterleavedArrays(GL_V3F, 0, mask_buff);
+    changeBuffer(mask)
+    #glDrawArrays(GL_QUAD_STRIP, 0, 4);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, mask.numItems)
+    #
+    if not happy
+        #    glRotatef(180, 1,0,0);
+        rotateX(180)
+        #    glTranslatef(0,0.3f,0);
+        translate(0, 0.3, 0)
+    #}
+    #glTranslatef(-0.15f, -0.05f,0);
+    translate(-0.15, -0.05, 0)
+    #glColor3f(1, 0, 0);
+    setColor(1,0,0,1)
+    gl.lineWidth(3)
+    retellPosition()
+    changeBuffer(smile)
+    gl.drawArrays(gl.LINE_STRIP, 0, smile.numItems)
+    gl.lineWidth(1)
+
+    #glPopMatrix();
+    mvPopMatrix();
 
 drawCube = (size) ->
     mvPushMatrix()
@@ -198,6 +267,9 @@ drawBot = (degs) ->
     rotateZ(a - b)
     translate(0,0,-z)
     drawCube(1)
+    drawFace(true)
+    changeBuffer(cube)
+    setColor(1,1,1,1)
     translate(0,0,-z)
     rotateZ(d - c - 180)
     drawCubeBackward(0.3, 2)
