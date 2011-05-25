@@ -7,6 +7,7 @@ import sw.utils.GLBaza;
 import sw.utils.Utils;
 
 import javax.imageio.ImageIO;
+import javax.xml.transform.Source;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,8 @@ import static org.lwjgl.opengl.GL11.glFlush;
  * User: SW
  * Date: 25.05.11
  * Time: 12:14
+ * <p/>
+ * Opens image from "input.jpg" file and saves to "output.jpg" after selecting rectangle. Scroll zooms in and out.
  */
 public class ImageDisplay extends GLBaza {
 
@@ -49,7 +52,7 @@ public class ImageDisplay extends GLBaza {
         glColor3f(1, 1, 0);
         glLineWidth(3);
         try {
-            image = ImageIO.read(new File("logon.jpg"));
+            image = ImageIO.read(new File("input.jpg"));
             buff = imageData(image);
             maxZoom = zoom = Math.min((float) width / image.getWidth(), (float) height / image.getHeight());
         } catch (IOException e) {
@@ -59,6 +62,7 @@ public class ImageDisplay extends GLBaza {
     }
 
     boolean drag;
+    boolean save;
     int firstCornerX = 0;
     int firstCornerY = 0;
     int secondCornerX = 0;
@@ -78,7 +82,10 @@ public class ImageDisplay extends GLBaza {
                     secondCornerY = Mouse.getY();
                 }
             } else {
-                drag = false;
+                if (drag) {
+                    drag = false;
+                    save = true;
+                }
             }
         }
     }
@@ -86,15 +93,15 @@ public class ImageDisplay extends GLBaza {
     @Override
     protected void render() {
         glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-        glRasterPos2f(image.getWidth() * zoom / width, image.getHeight() * zoom / height);
-        glPixelZoom(-zoom, -zoom);
+        glRasterPos2f(-image.getWidth() * zoom / width, image.getHeight() * zoom / height);
+        glPixelZoom(zoom, -zoom);
         glDrawPixels(image.getWidth(), image.getHeight(), GL_RGBA, GL11.GL_UNSIGNED_BYTE, buff);
 
-        if(drag) {
-            float x1 = -1+2*(float)firstCornerX/width;
-            float y1 = -1+2*(float)firstCornerY/height;
-            float x2 = -1+2*(float)secondCornerX/width;
-            float y2 = -1+2*(float)secondCornerY/height;
+        if (drag) {
+            float x1 = -1 + 2 * (float) firstCornerX / width;
+            float y1 = -1 + 2 * (float) firstCornerY / height;
+            float x2 = -1 + 2 * (float) secondCornerX / width;
+            float y2 = -1 + 2 * (float) secondCornerY / height;
             glBegin(GL11.GL_LINE_LOOP);
             glVertex2f(x1, y1);
             glVertex2f(x2, y1);
@@ -106,8 +113,41 @@ public class ImageDisplay extends GLBaza {
         glFlush();
     }
 
+    int toInt(byte b) {
+        if (b < 0) return b + 256;
+        else return (int) b;
+    }
+
     @Override
     protected void logic() {
+        if (save) {
+            save = false;
+            int startX = Math.min(firstCornerX, secondCornerX);
+            int startY = Math.min(firstCornerY, secondCornerY);
+            int w = Math.abs(firstCornerX - secondCornerX);
+            int h = Math.abs(firstCornerY - secondCornerY);
+            ByteBuffer tmp = BufferUtils.createByteBuffer(w * h * 4);
+            tmp.rewind();
+            render(); // re-render before grabbing pixels to eliminate yellow frame from output file.
+            glReadPixels(startX, startY, w, h, GL_RGBA, GL11.GL_UNSIGNED_BYTE, tmp);
+            BufferedImage frag = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            for (int y = 0; y < h; ++y) {
+                for (int x = 0; x < w; ++x) {
+                    int pos = (x + (h - y - 1) * w) * 4;
+                    int pix = 0;
+                    for (int i = 0; i < 3; ++i) {
+                        pix <<= 8;
+                        pix |= toInt(tmp.get(pos + i));
+                    }
+                    frag.setRGB(x, y, pix);
+                }
+            }
+            try {
+                ImageIO.write(frag, "JPEG", new File("output.jpg"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         Utils.sleep60Hz();
     }
 
