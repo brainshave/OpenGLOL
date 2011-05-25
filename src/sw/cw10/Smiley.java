@@ -7,10 +7,8 @@ import sw.utils.GLBaza;
 import sw.utils.Utils;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 import java.nio.ByteBuffer;
-import java.util.BitSet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,13 +35,6 @@ public class Smiley extends GLBaza {
 
     @Override
     protected void init() {
-
-        glEnable(GL_DEPTH_TEST);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-
         glClearColor(0, 0, 0, 0);
         glColor3f(1, 1, 1);
     }
