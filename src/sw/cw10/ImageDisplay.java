@@ -46,7 +46,8 @@ public class ImageDisplay extends GLBaza {
     @Override
     protected void init() {
         glClearColor(0, 0, 0, 0);
-        glColor3f(1, 1, 1);
+        glColor3f(1, 1, 0);
+        glLineWidth(3);
         try {
             image = ImageIO.read(new File("logon.jpg"));
             buff = imageData(image);
@@ -57,10 +58,28 @@ public class ImageDisplay extends GLBaza {
         }
     }
 
+    boolean drag;
+    int firstCornerX = 0;
+    int firstCornerY = 0;
+    int secondCornerX = 0;
+    int secondCornerY = 0;
+
     @Override
     protected void input() {
         while (Mouse.next()) {
             zoom = Math.max(0.001f, Math.min(zoom + ((float) Mouse.getEventDWheel() / 2000), maxZoom));
+            if (Mouse.isButtonDown(0)) {
+                if (!drag) {
+                    drag = true;
+                    secondCornerX = firstCornerX = Mouse.getEventX();
+                    secondCornerY = firstCornerY = Mouse.getEventY();
+                } else {
+                    secondCornerX = Mouse.getX();
+                    secondCornerY = Mouse.getY();
+                }
+            } else {
+                drag = false;
+            }
         }
     }
 
@@ -70,6 +89,20 @@ public class ImageDisplay extends GLBaza {
         glRasterPos2f(image.getWidth() * zoom / width, image.getHeight() * zoom / height);
         glPixelZoom(-zoom, -zoom);
         glDrawPixels(image.getWidth(), image.getHeight(), GL_RGBA, GL11.GL_UNSIGNED_BYTE, buff);
+
+        if(drag) {
+            float x1 = -1+2*(float)firstCornerX/width;
+            float y1 = -1+2*(float)firstCornerY/height;
+            float x2 = -1+2*(float)secondCornerX/width;
+            float y2 = -1+2*(float)secondCornerY/height;
+            glBegin(GL11.GL_LINE_LOOP);
+            glVertex2f(x1, y1);
+            glVertex2f(x2, y1);
+            glVertex2f(x2, y2);
+            glVertex2f(x1, y2);
+            glEnd();
+        }
+
         glFlush();
     }
 
