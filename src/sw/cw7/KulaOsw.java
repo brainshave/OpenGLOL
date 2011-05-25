@@ -22,7 +22,7 @@ public class KulaOsw extends GLBaza {
 
     public static final int GLEBOKOSC_REKURENCJI = 7;
     public static final boolean OSOBNE_WEKTORY_NORMALNE = true;
-    public static final boolean OBETNIJ_POL_KULI = false;
+    public static final boolean OBETNIJ_POL_KULI = true;
 
     public static IntBuffer bufferFromArray(int[] array) {
         IntBuffer buf = BufferUtils.createIntBuffer(array.length);

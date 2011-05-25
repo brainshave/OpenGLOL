@@ -1,6 +1,6 @@
 gl = undefined
-circle = {}
-cube = {}
+circle = undefined
+cube = undefined
 eye = {}
 smile = {}
 mask = {}
@@ -321,6 +321,7 @@ botFigureInTime = () ->
     last_i = i;
     degs
 
+figure = []
 
 drawScene = ->
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
@@ -349,7 +350,6 @@ drawScene = ->
 
     sadBot()
 
-    figure = botFigureInTime()
     rotateY(rotation)
     for i in [0...8]
         rotateY(45)
@@ -362,7 +362,9 @@ drawScene = ->
 
 tick = ->
     requestAnimationFrame(tick)
+    figure = botFigureInTime()
     drawScene()
 
-init()
-tick()
+window.onload = ->
+    init()
+    tick()

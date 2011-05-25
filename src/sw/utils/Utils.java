@@ -2,6 +2,7 @@ package sw.utils;
 
 import org.lwjgl.BufferUtils;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -23,6 +24,15 @@ public class Utils {
 
     public static FloatBuffer bufferFromArray(float[] array) {
         FloatBuffer buf = BufferUtils.createFloatBuffer(array.length);
+        buf.rewind();
+        buf.put(array);
+        buf.flip();
+        return buf;
+    }
+
+
+    public static ByteBuffer bufferFromArray(byte[] array) {
+        ByteBuffer buf = BufferUtils.createByteBuffer(array.length);
         buf.rewind();
         buf.put(array);
         buf.flip();
@@ -56,5 +66,12 @@ public class Utils {
 
     public static float[] vectorProduct(float[] a, float[] b) {
         return new float[]{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
+    }
+
+    public static void sleep60Hz() {
+        try {
+            Thread.sleep(16, 666);
+        } catch (InterruptedException ex) {
+        }
     }
 }

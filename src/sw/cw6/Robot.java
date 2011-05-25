@@ -202,8 +202,8 @@ public class Robot extends GLBaza {
     float[][] sequence = {
             {90, 120, 30, 120, -leftDeg, 0, 1},
             {76, 180, 30, 60, 0, leftDeg, 1},
-            {30, 120, 90, 120, -rightDeg, 0, 0},
-            {30, 60, 90, 180, 0, rightDeg, 0}
+            {30, 120, 90, 120, -rightDeg, 0, -1},
+            {30, 60, 90, 180, 0, rightDeg, -1}
     };
 
     final int seqlength = sequence[0].length;
