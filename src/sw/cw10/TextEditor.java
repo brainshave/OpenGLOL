@@ -15,19 +15,38 @@ import static org.lwjgl.opengl.GL11.*;
  * Time: 10:40
  */
 public class TextEditor extends GLBaza {
-    final String IMAGE_FILE = "141.gif";
-    final String[] CHAR_MAP = {
-            "abcdef",
-            "ghijkl",
-            "mnopqr",
-            "stuvwx",
-            "yz()-0",
-            "123456",
-            "789.:,",
-            "'\"?!~ "
+    String[] FONT_NAMES = {"141.gif", "056.gif", "034.gif"};
+    String[][] FONT_MAPS = {
+            {
+                    "abcdef",
+                    "ghijkl",
+                    "mnopqr",
+                    "stuvwx",
+                    "yz()-0",
+                    "123456",
+                    "789.:,",
+                    "'\"?!`_"
+            },
+            {
+                    "abcdefgh",
+                    "ijklmnop",
+                    "qrstuvwx",
+                    "yz:.!,-\"",
+                    "   '?)(;"
+            },
+            {
+                    "abcdef",
+                    "ghijkl",
+                    "mnopqr",
+                    "stuvwx",
+                    "yz1234",
+                    "56789.",
+                    ",-:!  ",
+                    "() ?0 "
+            }
     };
 
-    Font font;
+    Font[] fonts = new Font[Math.min(FONT_NAMES.length, FONT_MAPS.length)];
 
     @Override
     protected void init() {
@@ -35,32 +54,54 @@ public class TextEditor extends GLBaza {
         glPixelZoom(1, -1);
 
         try {
-            font = new Font(new File(IMAGE_FILE), CHAR_MAP, width, height);
+            for (int i = 0; i < fonts.length; ++i) {
+                fonts[i] = new Font(new File(FONT_NAMES[i]), FONT_MAPS[i], width, height);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
     }
 
-    StringBuilder text = new StringBuilder("To jest edytor tekstu! :)");
+    StringBuilder text = new StringBuilder("To jest edytor\ntekstu! :)\nF1 zmienia czcionke|");
 
     @Override
     protected void input() {
         while (Keyboard.next()) {
             if (Keyboard.getEventKeyState()) {
-                if (Keyboard.getEventKey() == Keyboard.KEY_BACK && text.length() > 0) {
-                    text.delete(text.length() - 1, text.length());
-                } else if (font.getAvailableChars().contains(Keyboard.getEventCharacter())) {
-                    text.append(Keyboard.getEventCharacter());
+                if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
+                    font = (font + 1) % fonts.length;
+                } else if (Keyboard.getEventKey() == Keyboard.KEY_BACK && text.length() > 1) {
+                    text.deleteCharAt(text.length() - 2);
+                } else if (Keyboard.getEventKey() == Keyboard.KEY_RETURN) {
+                    text.insert(text.length() - 1, '\n');
+                } else if (activeFont().getAvailableChars().contains(Character.toLowerCase(Keyboard.getEventCharacter()))) {
+                    text.insert(text.length() - 1, Keyboard.getEventCharacter());
                 }
             }
         }
     }
 
+    int font = 0;
+    long start = System.currentTimeMillis();
+    boolean blink = true;
+
+    void blink() {
+        blink = (((System.currentTimeMillis() - start) % 700) / 350) == 1;
+    }
+
+    Font activeFont() {
+        return fonts[font];
+    }
+
     @Override
     protected void render() {
         glClear(GL_COLOR_BUFFER_BIT);
-        font.draw(0, 0, text.toString(), true);
+        glPushMatrix();
+        blink();
+        activeFont().draw(0, 0, text.substring(0, text.length() - (blink ? 1 : 0)));
+        glRasterPos2f(0, 0);
+        glPopMatrix();
     }
 
     @Override

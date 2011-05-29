@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -41,7 +42,7 @@ public class Font {
         if (!checkCharMap(char_map)) throw new Exception("Character map doesn't have equal column counts in each row.");
 
         int map_size = char_map.length * char_map[0].length();
-        final int first_display_list = glGenLists(map_size);
+        final int first_display_list = glGenLists(map_size + 2); // +1 for space
         if (first_display_list == 0) throw new Exception("Can't create display lists.");
 
         // Setting the "character -> display list index" map
@@ -54,6 +55,8 @@ public class Font {
                 }
             }
         }
+        displayListsMap.put(' ', first_display_list + map_size);
+        displayListsMap.put('|', first_display_list + map_size + 1);
 
         BufferedImage img;
         try {
@@ -76,9 +79,25 @@ public class Font {
             glPixelStorei(GL_UNPACK_ROW_LENGTH, img.getWidth());
             glPixelStorei(GL_UNPACK_SKIP_PIXELS, (skip_chars % chars_in_row) * charWidth);
             glPixelStorei(GL_UNPACK_SKIP_ROWS, (skip_chars / chars_in_row) * charHeight);
+            glRasterPos2f(0, 0);
             glDrawPixels(charWidth, charHeight, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+            glTranslatef((float) charWidth * 2 / windowWidth, 0, 0);
             glEndList();
         }
+        // space
+        glNewList(first_display_list + map_size, GL_COMPILE);
+        glTranslatef((float) charWidth * 2 / windowWidth, 0, 0);
+        glEndList();
+        // cursor
+        glNewList(first_display_list + map_size + 1, GL_COMPILE);
+        glLineWidth(3);
+        glColor3f(1,1,1);
+        glBegin(GL_LINES);
+        glVertex2f(0, 0);
+        glVertex2f(0, -(float) charHeight*2 / windowHeight);
+        glEnd();
+        glTranslatef((float) charWidth * 2 / windowWidth, 0, 0);
+        glEndList();
     }
 
     public void draw(char c) {
@@ -88,30 +107,40 @@ public class Font {
         }
     }
 
-    public void draw(int x, int y, String str, boolean wrap) {
-        int xoff = x;
-        int yoff = y;
-        for (char c : str.toCharArray()) {
-            switch (c) {
-                case '\n':
-                    yoff += charHeight;
-                    xoff = x;
-                    break;
-                case ' ':
-                    xoff += charWidth;
-                    break;
-                default:
-                    glRasterPos2f(
-                            (-(float) windowWidth / 2 + xoff) * 2 / windowWidth,
-                            ((float) windowHeight / 2 - yoff) * 2 / windowHeight
-                    );
-                    draw(c);
-                    xoff += charWidth;
-                    if (wrap && xoff + charWidth > windowWidth) {
-                        yoff += charHeight;
-                        xoff = x;
-                    }
+    public void draw(String str) {
+        int[] lists = new int[str.length()];
+        for (int i = 0; i < str.length(); ++i) {
+            try {
+                lists[i] = displayListsMap.get(Character.toLowerCase(str.charAt(i)));
+            } catch (NullPointerException e) {
             }
+        }
+        glCallLists(Utils.bufferFromArray(lists));
+    }
+
+    private void nextLine() {
+        glTranslatef(0, -(float) charHeight * 2 / windowHeight, 0);
+    }
+
+    public void draw(int x, int y, String str) {
+        glTranslatef((-(float) windowWidth / 2 + x) * 2 / windowWidth,
+                ((float) windowHeight / 2 - y) * 2 / windowHeight, 0);
+        int max_chars_in_line = (windowWidth - x) / charWidth;
+        StringTokenizer tokenizer = new StringTokenizer(str, "\n", true);
+        boolean was_empty = false;
+        while (tokenizer.hasMoreTokens()) {
+            String line = tokenizer.nextToken();
+            int start = -max_chars_in_line;
+            do {
+                start += max_chars_in_line;
+                String subline = line.substring(start, Math.min(start + max_chars_in_line, line.length()));
+                glPushMatrix();
+                draw(subline);
+                glPopMatrix();
+                boolean is_empty = "\n".equals(subline);
+                if (!is_empty || (was_empty && is_empty)) nextLine();
+                was_empty = is_empty;
+            } while (line.length() - start > max_chars_in_line);
         }
     }
 
