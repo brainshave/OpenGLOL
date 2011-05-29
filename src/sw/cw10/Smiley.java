@@ -6,9 +6,9 @@ import org.lwjgl.opengl.GL11;
 import sw.utils.GLBaza;
 import sw.utils.Utils;
 
-import static org.lwjgl.opengl.GL11.*;
-
 import java.nio.ByteBuffer;
+
+import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Created by IntelliJ IDEA.

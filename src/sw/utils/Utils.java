@@ -2,6 +2,8 @@ package sw.utils;
 
 import org.lwjgl.BufferUtils;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -11,7 +13,6 @@ import java.nio.IntBuffer;
  * User: SW
  * Date: 13.04.11
  * Time: 20:19
- * To change this template use File | Settings | File Templates.
  */
 public class Utils {
     public static IntBuffer bufferFromArray(int[] array) {
@@ -73,5 +74,21 @@ public class Utils {
             Thread.sleep(16, 666);
         } catch (InterruptedException ex) {
         }
+    }
+
+    public static ByteBuffer imageData(BufferedImage image) {
+        ByteBuffer bb = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * 4);
+        bb.rewind();
+        for (int y = 0; y < image.getHeight(); ++y) {
+            for (int x = 0; x < image.getWidth(); ++x) {
+                int p = image.getRGB(x, y);
+                for (int i = 16; i >= 0; i -= 8) {
+                    bb.put((byte) ((p >> i) & 0xFF));
+                }
+                bb.put((byte) -1);
+            }
+        }
+        bb.flip();
+        return bb;
     }
 }

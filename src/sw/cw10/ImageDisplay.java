@@ -7,14 +7,12 @@ import sw.utils.GLBaza;
 import sw.utils.Utils;
 
 import javax.imageio.ImageIO;
-import javax.xml.transform.Source;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.glFlush;
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,22 +23,6 @@ import static org.lwjgl.opengl.GL11.glFlush;
  * Opens image from "input.jpg" file and saves to "output.jpg" after selecting rectangle. Scroll zooms in and out.
  */
 public class ImageDisplay extends GLBaza {
-
-    ByteBuffer imageData(BufferedImage image) {
-        ByteBuffer bb = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * 4);
-        bb.rewind();
-        for (int y = 0; y < image.getHeight(); ++y) {
-            for (int x = 0; x < image.getWidth(); ++x) {
-                int p = image.getRGB(x, y);
-                for (int i = 16; i >= 0; i -= 8) {
-                    bb.put((byte) ((p >> i) & 0xFF));
-                }
-                bb.put((byte) -1);
-            }
-        }
-        bb.flip();
-        return bb;
-    }
 
     BufferedImage image = null;
     ByteBuffer buff = null;
@@ -53,7 +35,7 @@ public class ImageDisplay extends GLBaza {
         glLineWidth(3);
         try {
             image = ImageIO.read(new File("input.jpg"));
-            buff = imageData(image);
+            buff = Utils.imageData(image);
             maxZoom = zoom = Math.min((float) width / image.getWidth(), (float) height / image.getHeight());
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
