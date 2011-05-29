@@ -82,7 +82,7 @@ public class TextEditor extends GLBaza {
         }
     }
 
-    int font = 0;
+    int font = 2;
     long start = System.currentTimeMillis();
     boolean blink = true;
 
