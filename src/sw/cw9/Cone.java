@@ -1,7 +1,6 @@
 package sw.cw9;
 
 import org.lwjgl.BufferUtils;
-import sw.utils.Material;
 import sw.utils.Utils;
 
 import java.nio.FloatBuffer;

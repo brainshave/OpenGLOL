@@ -2,7 +2,6 @@ package sw.utils;
 
 import org.lwjgl.BufferUtils;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

@@ -1,13 +1,15 @@
 package sw.cw5;
 
-import org.lwjgl.input.Keyboard;
-import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
-import java.nio.FloatBuffer;
-import java.util.Random;
+import org.lwjgl.input.Keyboard;
 import sw.utils.GLBaza;
+
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.Random;
+
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.util.glu.GLU.*;
+import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 /**
  * BAJER: Rozdzielczość przybliżenia powierzchni Beziera można zwiększać

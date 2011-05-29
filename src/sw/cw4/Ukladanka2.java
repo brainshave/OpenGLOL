@@ -1,17 +1,15 @@
 package sw.cw4;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
-import java.util.Collections;
-import java.util.List;
+import sw.utils.GLBaza;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
-import org.lwjgl.BufferUtils;
-import sw.utils.GLBaza;
+import java.util.*;
+
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.util.glu.GLU.*;
+import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 /**
  *

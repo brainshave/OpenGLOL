@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.lwjgl.opengl.GL11.*;
-import static sw.utils.Utils.normalize;
-import static sw.utils.Utils.vector;
-import static sw.utils.Utils.vectorProduct;
+import static sw.utils.Utils.*;
 
 /**
  * Created by IntelliJ IDEA.

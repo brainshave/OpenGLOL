@@ -4,6 +4,10 @@
  */
 package sw.cw4;
 
+import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Keyboard;
+import sw.utils.GLBaza;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -12,11 +16,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.input.Keyboard;
-import sw.utils.GLBaza;
-import static org.lwjgl.util.glu.GLU.*;
+
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 /**
  *

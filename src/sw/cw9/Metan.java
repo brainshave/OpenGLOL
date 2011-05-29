@@ -6,8 +6,6 @@ import sw.utils.Light;
 import sw.utils.Material;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_SMOOTH;
-import static org.lwjgl.opengl.GL11.glShadeModel;
 import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 /**

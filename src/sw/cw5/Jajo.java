@@ -4,12 +4,14 @@
  */
 package sw.cw5;
 
-import java.nio.IntBuffer;
-import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 import sw.utils.GLBaza;
+
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.util.glu.GLU.*;
+import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 /**
  *

@@ -2,10 +2,9 @@ package sw.cw9;
 
 import org.lwjgl.BufferUtils;
 
+import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
-
-import java.nio.FloatBuffer;
 
 /**
  * Created by IntelliJ IDEA.

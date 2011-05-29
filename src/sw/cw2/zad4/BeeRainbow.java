@@ -4,9 +4,11 @@
  */
 package sw.cw2.zad4;
 
-import java.nio.ByteBuffer;
 import org.lwjgl.util.glu.GLU;
 import sw.utils.GLBaza;
+
+import java.nio.ByteBuffer;
+
 import static org.lwjgl.opengl.GL11.*;
 
 /**

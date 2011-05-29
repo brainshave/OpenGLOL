@@ -6,6 +6,7 @@ package sw.cw2.zad3;
 
 import org.lwjgl.util.glu.GLU;
 import sw.utils.GLBaza;
+
 import static org.lwjgl.opengl.GL11.*;
 
 /**

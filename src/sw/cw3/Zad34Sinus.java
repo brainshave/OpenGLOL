@@ -4,15 +4,17 @@
  */
 package sw.cw3;
 
+import org.lwjgl.BufferUtils;
+import sw.utils.GLBaza;
+
+import java.nio.FloatBuffer;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.lwjgl.BufferUtils;
-import java.nio.FloatBuffer;
-import sw.utils.GLBaza;
-import static org.lwjgl.util.glu.GLU.*;
+
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.Util.*;
+import static org.lwjgl.opengl.Util.checkGLError;
+import static org.lwjgl.util.glu.GLU.gluOrtho2D;
 
 /**
  *

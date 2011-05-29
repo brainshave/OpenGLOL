@@ -4,11 +4,12 @@
  */
 package sw.cw3;
 
-import java.util.Random;
 import sw.utils.GLBaza;
 
-import static org.lwjgl.util.glu.GLU.*;
+import java.util.Random;
+
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.util.glu.GLU.gluOrtho2D;
 
 /**
  *

@@ -6,8 +6,9 @@ package sw.cw6;
 
 import org.lwjgl.util.glu.Sphere;
 import sw.utils.GLBaza;
+
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.util.glu.GLU.*;
+import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 /**
  *

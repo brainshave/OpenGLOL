@@ -4,14 +4,16 @@
  */
 package sw.cw4;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import sw.utils.GLBaza;
-import static org.lwjgl.util.glu.GLU.*;
-import static org.lwjgl.opengl.GL11.*;
 import org.lwjgl.BufferUtils;
+import sw.utils.GLBaza;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 /**
  *

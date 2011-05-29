@@ -3,6 +3,7 @@ package sw.cw2.zad5;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.glu.GLU;
 import sw.utils.GLBaza;
+
 import static org.lwjgl.opengl.GL11.*;
 
 /**
