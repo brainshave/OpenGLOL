@@ -62,7 +62,7 @@ public class Font {
         try {
             img = ImageIO.read(file);
         } catch (IOException e) {
-            throw new Exception("Can't load font. Exiting.", e);
+            throw new Exception("Can't load font.", e);
         }
 
         ByteBuffer imgData = Utils.imageData(img);
@@ -91,10 +91,10 @@ public class Font {
         // cursor
         glNewList(first_display_list + map_size + 1, GL_COMPILE);
         glLineWidth(3);
-        glColor3f(1,1,1);
+        glColor3f(1, 1, 1);
         glBegin(GL_LINES);
         glVertex2f(0, 0);
-        glVertex2f(0, -(float) charHeight*2 / windowHeight);
+        glVertex2f(0, -(float) charHeight * 2 / windowHeight);
         glEnd();
         glTranslatef((float) charWidth * 2 / windowWidth, 0, 0);
         glEndList();
