@@ -61,7 +61,7 @@ public class Tetrahedron extends GLBaza {
             e.printStackTrace();
             System.exit(1);
         }
-        ByteBuffer bb = Utils.imageData(img);
+        ByteBuffer bb = Utils.imageDataUpsideDown(img);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.getWidth(), img.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, bb);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

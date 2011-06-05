@@ -93,6 +93,22 @@ public class Utils {
         return bb;
     }
 
+    public static ByteBuffer imageDataUpsideDown(BufferedImage image) {
+        ByteBuffer bb = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * 4);
+        bb.rewind();
+        for (int y = image.getHeight() -1; y >= 0; --y) {
+            for (int x = 0; x < image.getWidth(); ++x) {
+                int p = image.getRGB(x, y);
+                for (int i = 16; i >= 0; i -= 8) {
+                    bb.put((byte) ((p >> i) & 0xFF));
+                }
+                bb.put((byte) -1);
+            }
+        }
+        bb.flip();
+        return bb;
+    }
+
     public static void initPerspective(GLBaza program, float near, float far) {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();

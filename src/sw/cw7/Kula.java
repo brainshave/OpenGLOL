@@ -34,10 +34,10 @@ public class Kula {
     }
 
     private float[][] startVerts = {
-            normalize(new float[]{1, 1, 1}),
-            normalize(new float[]{-1, -1, 1}),
-            normalize(new float[]{-1, 1, -1}),
-            normalize(new float[]{1, -1, -1})
+            enlarge(normalize(new float[]{1, 1, 1}), R),
+            enlarge(normalize(new float[]{-1, -1, 1}), R),
+            enlarge(normalize(new float[]{-1, 1, -1}), R),
+            enlarge(normalize(new float[]{1, -1, -1}), R)
     };
 
     private float[][][] startTriangles = {

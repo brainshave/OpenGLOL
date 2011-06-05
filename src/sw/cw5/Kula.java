@@ -167,6 +167,7 @@ public class Kula extends GLBaza {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glRotatef(1, 1, 0, 0);
 
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         for (float[][] triangle : startTriangles) {
             divideRecur(triangle);
         }
