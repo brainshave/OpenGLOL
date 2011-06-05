@@ -21,7 +21,7 @@ import static org.lwjgl.util.glu.GLU.gluLookAt;
  * Date: 05.06.11
  * Time: 13:14
  */
-public class SphericMapping extends GLBaza {
+public class SphereMap extends GLBaza {
     int backBuffer;
 
     int MODEL_COUNT = 3;
@@ -172,6 +172,6 @@ public class SphericMapping extends GLBaza {
     }
 
     public static void main(String[] args) {
-        new SphericMapping().start();
+        new SphereMap().start();
     }
 }
