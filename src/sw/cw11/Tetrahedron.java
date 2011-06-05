@@ -38,7 +38,7 @@ public class Tetrahedron extends GLBaza {
 
     IntBuffer textures;
 
-    IntBuffer textures(File[] files) {
+    public static IntBuffer textures(File[] files) {
         IntBuffer ts = BufferUtils.createIntBuffer(files.length);
         ts.rewind();
         glEnable(GL_TEXTURE_2D);
@@ -53,7 +53,7 @@ public class Tetrahedron extends GLBaza {
         return ts;
     }
 
-    void texture(File file) {
+    public static void texture(File file) {
         BufferedImage img = null;
         try {
             img = ImageIO.read(file);

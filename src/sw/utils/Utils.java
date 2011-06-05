@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import static org.lwjgl.opengl.GL11.*;
+
 /**
  * Created by IntelliJ IDEA.
  * User: SW
@@ -89,5 +91,32 @@ public class Utils {
         }
         bb.flip();
         return bb;
+    }
+
+    public static void initPerspective(GLBaza program, float near, float far) {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        float size = 1;
+        if (program.width > program.height) {
+            glFrustum(-size * (float) program.width / program.height,
+                    size * (float) program.width / program.height, -size, size, near, far);
+        } else {
+            glFrustum(-size, size, -size * (float) program.height / program.width,
+                    size * (float) program.height / program.width, near, far);
+        }
+        glMatrixMode(GL_MODELVIEW);
+    }
+
+    public static void enable(int[] enables) {
+        for (int flag : enables) {
+            glEnable(flag);
+        }
+    }
+
+
+    public static void disable(int[] disables) {
+        for (int flag : disables) {
+            glDisable(flag);
+        }
     }
 }

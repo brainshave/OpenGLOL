@@ -128,6 +128,15 @@ public class Kula {
     IntBuffer bufferNames = BufferUtils.createIntBuffer(1);
 
     public Kula(int deepness, boolean nice) {
+        glGenBuffers(bufferNames);
+        create(bufferNames.get(0), deepness, nice);
+    }
+
+    public Kula(int buffer, int deepness, boolean nice) {
+        create(buffer, deepness, nice);
+    }
+
+    private void create(int buffer, int deepness, boolean nice) {
         this.nice = nice;
         count = (int) Math.pow(startTriangles.length, deepness + 2);
         normsAndVerts = BufferUtils.createFloatBuffer(count * 6);
@@ -138,8 +147,7 @@ public class Kula {
         normsAndVerts.flip().rewind();
         count = normsAndVerts.remaining() / 6;
         bufferNames.rewind();
-        glGenBuffers(bufferNames);
-        glBindBuffer(GL_ARRAY_BUFFER, bufferNames.get(0));
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
         glBufferData(GL_ARRAY_BUFFER, normsAndVerts, GL_STATIC_DRAW);
         glInterleavedArrays(GL_N3F_V3F, 0, 0);
         normsAndVerts.clear();
@@ -147,6 +155,16 @@ public class Kula {
     }
 
     public void draw() {
+        glBindBuffer(GL_ARRAY_BUFFER, bufferNames.get(0));
+        glInterleavedArrays(GL_N3F_V3F, 0, 0);
         glDrawArrays(GL_TRIANGLES, 0, count);
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public int getMode() {
+        return GL_TRIANGLES;
     }
 }

@@ -1,5 +1,8 @@
 package sw.utils;
 
+import com.sun.corba.se.spi.presentation.rmi.IDLNameTranslator;
+import sun.text.normalizer.IntTrie;
+
 import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -18,10 +21,14 @@ public class Light {
     FloatBuffer[] settings;
     int name;
 
+    public Light(int name, float[] pos) {
+        this(name, new float[][]{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, pos});
+    }
+
     public Light(int name, float[][] settings) {
         this.name = name;
         this.settings = new FloatBuffer[SETTINGS.length];
-        for(int i = 0; i < SETTINGS.length; ++i) {
+        for (int i = 0; i < SETTINGS.length; ++i) {
             this.settings[i] = bufferFromArray(settings[i]);
         }
     }
