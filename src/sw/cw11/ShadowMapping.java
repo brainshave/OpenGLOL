@@ -1,16 +1,13 @@
 package sw.cw11;
 
-import com.sun.org.apache.bcel.internal.generic.AALOAD;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.ARBDepthTexture;
 import org.lwjgl.opengl.ARBShadow;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Matrix4f;
 import sw.utils.*;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -71,11 +68,16 @@ public class ShadowMapping extends GLBaza {
         glClearColor(0, 0, 0, 0);
 
         cube = new Cube();
-        bright = new Light(GL_LIGHT0, lightPos);
+        bright = new Light(GL_LIGHT0, new float[][]{
+                {1, 1, 1, 1},
+                {1, 1, 1, 1},
+                {1, 1, 1, 1},
+                lightPos
+        });
         dim = new Light(GL_LIGHT0, new float[][]{
-                {0, 0, 0, 0},
+                {0, 0, 0, 1},
                 {0.3f, 0.3f, 0.3f, 1},
-                {0, 0, 0, 0},
+                {0, 0, 0, 1},
                 lightPos
         });
         cubeMat = new Material(120, new float[][]{
@@ -88,8 +90,6 @@ public class ShadowMapping extends GLBaza {
                 {0, 0.1f, 0, 1},
                 {0, 0, 0, 0}
         });
-
-        bright.on();
 
         createLists();
 
@@ -116,7 +116,7 @@ public class ShadowMapping extends GLBaza {
         lightViewMat.rewind();
         cameraProjMat.rewind();
         cameraViewMat.rewind();
-        Utils.initPerspective(this, 1, lightPos[1] + 1);
+        Utils.initPerspective(this, 3, 10);
         lookAt(lightPos, lightUpV);
         glGetFloat(GL_PROJECTION_MATRIX, lightProjMat);
         glGetFloat(GL_MODELVIEW_MATRIX, lightViewMat);
@@ -131,19 +131,21 @@ public class ShadowMapping extends GLBaza {
         lightPro.load(lightProjMat);
         Matrix4f lightView = new Matrix4f();
         lightView.load(lightViewMat);
+
         Matrix4f biasMatrix = new Matrix4f();
         FloatBuffer biasBuff = Utils.bufferFromArray(new float[]{
-                0.5f, 0, 0, 0,
-                0, 0.5f, 0, 0,
-                0, 0, 0.5f, 0,
-                0.5f, 0.5f, 0.5f, 1
+                0.5f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.5f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.5f, 0.0f,
+                0.5f, 0.5f, 0.5f, 1.0f
         });
         biasBuff.rewind();
         biasMatrix.load(biasBuff);
-        Matrix4f.mul(biasMatrix, lightPro, lightPro);
 
         Matrix4f textureMatrix = new Matrix4f();
-        Matrix4f.mul(lightPro, lightView, textureMatrix);
+        Matrix4f.mul(Matrix4f.mul(biasMatrix, lightPro, null), lightView, textureMatrix);
+        //Matrix4f.mul(Matrix4f.mul(lightPro, lightView, null), biasMatrix, textureMatrix);
+
         FloatBuffer texMatBuff = BufferUtils.createFloatBuffer(16);
         texMatBuff.rewind();
         textureMatrix.storeTranspose(texMatBuff);
@@ -215,13 +217,12 @@ public class ShadowMapping extends GLBaza {
         glPopMatrix();
     }
 
-    int[] textureGenerators = {GL_TEXTURE_GEN_S, GL_TEXTURE_GEN_T, GL_TEXTURE_GEN_R, GL_TEXTURE_GEN_Q, GL_TEXTURE_2D, GL_ALPHA_TEST};
+    int[] textureGenerators = {GL_TEXTURE_GEN_S, GL_TEXTURE_GEN_T, GL_TEXTURE_GEN_R, GL_TEXTURE_GEN_Q, GL_TEXTURE_2D, GL_ALPHA_TEST, GL_LIGHTING};
 
     @Override
     protected void render() {
         //saveMatrices();
         glClear(GL_DEPTH_BUFFER_BIT);
-        dim.on();
 
         // 1. Light's point of view
         loadMatrices(lightProjMat, lightViewMat);
@@ -231,26 +232,25 @@ public class ShadowMapping extends GLBaza {
         glShadeModel(GL_FLAT);
         glColorMask(false, false, false, false);
 
-        drawScene();
         glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
+        drawScene();
         glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, shadowMapSize, shadowMapSize);
-
 
         // Revert state
         glShadeModel(GL_SMOOTH);
         glColorMask(true, true, true, true);
         glViewport(0, 0, width, height);
 
-        loadMatrices(cameraProjMat, cameraViewMat);
         // 2. Dim-lit scene from eye perspective
+        loadMatrices(cameraProjMat, cameraViewMat);
+        dim.on();
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         drawScene();
 
         // 3. Bright-lit scene with mask
         Utils.enable(textureGenerators);
         glAlphaFunc(GL_GEQUAL, 0.99f);
-        //loadMatrices(cameraProjMat, cameraViewMat);
-        if(lit) bright.on();
+        if (lit) bright.on();
         drawScene();
         Utils.disable(textureGenerators);
     }
