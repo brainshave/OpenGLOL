@@ -3,6 +3,7 @@ package sw.cw7;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Mouse;
 import sw.utils.GLBaza;
+import sw.utils.Sphere;
 
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
@@ -80,7 +81,7 @@ public class KulaOsw extends GLBaza {
         glColor3f(0, 0, 0);
         glClearColor(0, 0, 0, 0);
 
-        kula = new Kula(GLEBOKOSC_REKURENCJI, OSOBNE_WEKTORY_NORMALNE);
+        sphere = new Sphere(GLEBOKOSC_REKURENCJI, OSOBNE_WEKTORY_NORMALNE);
 
         setupMaterial(ball_material, ball_shininess);
     }
@@ -152,7 +153,7 @@ public class KulaOsw extends GLBaza {
         }
     }
 
-    Kula kula;
+    Sphere sphere;
 
     float azimuth0 = 0;
     float azimuth1 = 0;
@@ -175,7 +176,7 @@ public class KulaOsw extends GLBaza {
         rotateLight(GL_LIGHT1, light1, azimuth1, elevation1);
 
         glPushMatrix();
-        kula.draw();
+        sphere.draw();
         glPopMatrix();
         glFlush();
     }

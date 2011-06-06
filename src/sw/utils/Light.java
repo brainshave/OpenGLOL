@@ -41,4 +41,8 @@ public class Light {
             glLight(name, SETTINGS[i], settings[i]);
         }
     }
+
+    public void pos() {
+        glLight(name, SETTINGS[3], settings[3]);
+    }
 }

@@ -3,7 +3,7 @@ package sw.cw11;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL15;
-import sw.cw7.Kula;
+import sw.utils.Sphere;
 import sw.utils.GLBaza;
 import sw.utils.Utils;
 
@@ -100,10 +100,10 @@ public class SphereMap extends GLBaza {
         modes[1] = coneMode;
         sizes[1] = coneSize / 6;
 
-        // kula
-        Kula kula = new Kula(models.get(2), 4, true); // bindbuffer, bufferdata is done in constructor
-        modes[2] = kula.getMode();
-        sizes[2] = kula.getCount();
+        // sphere
+        Sphere sphere = new Sphere(models.get(2), 4, true); // bindbuffer, bufferdata is done in constructor
+        modes[2] = sphere.getMethod();
+        sizes[2] = sphere.getCount();
 
         // sześcian
         glBindBuffer(GL_ARRAY_BUFFER, models.get(3));

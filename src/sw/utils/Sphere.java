@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package sw.cw7;
+package sw.utils;
 
 import org.lwjgl.BufferUtils;
 
@@ -15,7 +15,7 @@ import static org.lwjgl.opengl.GL15.*;
 /**
  * @author Szymon
  */
-public class Kula {
+public class Sphere extends Shape {
 
     public static IntBuffer bufferFromArray(int[] array) {
         IntBuffer buf = BufferUtils.createIntBuffer(array.length);
@@ -105,8 +105,6 @@ public class Kula {
             vec[i] = triangle[0][i] - triangle[2][i];
         }
         if (recur <= 0) {
-            //float[] norm = new float[0];
-
             float[] norm = normalize(between(new float[]{0, 0, 0}, between(triangle[0], between(triangle[1], triangle[2]))));
 
             for (float[] vert : triangle) {
@@ -127,12 +125,12 @@ public class Kula {
     private FloatBuffer normsAndVerts;
     IntBuffer bufferNames = BufferUtils.createIntBuffer(1);
 
-    public Kula(int deepness, boolean nice) {
+    public Sphere(int deepness, boolean nice) {
         glGenBuffers(bufferNames);
         create(bufferNames.get(0), deepness, nice);
     }
 
-    public Kula(int buffer, int deepness, boolean nice) {
+    public Sphere(int buffer, int deepness, boolean nice) {
         create(buffer, deepness, nice);
     }
 
@@ -149,22 +147,23 @@ public class Kula {
         bufferNames.rewind();
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
         glBufferData(GL_ARRAY_BUFFER, normsAndVerts, GL_STATIC_DRAW);
-        glInterleavedArrays(GL_N3F_V3F, 0, 0);
         normsAndVerts.clear();
         normsAndVerts = null;
     }
 
-    public void draw() {
-        glBindBuffer(GL_ARRAY_BUFFER, bufferNames.get(0));
-        glInterleavedArrays(GL_N3F_V3F, 0, 0);
-        glDrawArrays(GL_TRIANGLES, 0, count);
+    public int getBuffer() {
+        return bufferNames.get(0);
     }
 
     public int getCount() {
         return count;
     }
 
-    public int getMode() {
+    public int getLayout() {
+        return GL_N3F_V3F;
+    }
+
+    public int getMethod() {
         return GL_TRIANGLES;
     }
 }
