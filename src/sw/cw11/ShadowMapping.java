@@ -1,16 +1,18 @@
 package sw.cw11;
 
-import com.sun.deploy.panel.ITreeNode;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.input.Keyboard;
 import sw.utils.*;
 
+import java.security.Key;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 public class ShadowMapping extends GLBaza {
     Cube cube;
-    Light light;
+    Light bright, dim;
+    int firstDisplayList;
+
     Material cubeMat, tabletopMat;
     float[] lightPos = {0, 10, 0, 1};
     float[] lightUpV = {0, 0, 1};
@@ -34,48 +36,75 @@ public class ShadowMapping extends GLBaza {
         glClearColor(0, 0, 0, 0);
 
         cube = new Cube();
-        light = new Light(GL_LIGHT0, lightPos);
+        bright = new Light(GL_LIGHT0, lightPos);
+        dim = new Light(GL_LIGHT0, new float[][]{
+                {0, 0, 0, 0},
+                {0.3f, 0.3f, 0.3f, 1},
+                {0, 0, 0, 0},
+                lightPos
+        });
         cubeMat = new Material(120, new float[][]{
                 {0, 0.2f, 0.2f, 1},
                 {0, 1, 1, 1},
                 {1, 1, 1, 1,}
         });
         tabletopMat = new Material(1, new float[][]{
-                {0, 0, 0.2f, 1},
-                {0, 0, 0.25f, 1},
+                {0, 0.1f, 0, 1},
+                {0, 0.1f, 0, 1},
                 {0, 0, 0, 0}
         });
 
-        light.on();
+        bright.on();
 
+        createLists();
     }
 
     @Override
     protected void input() {
+        while(Keyboard.next()) {
+            if(Keyboard.getEventKeyState()) {
+                dim.on();
+            } else {
+                bright.on();
+            }
+        }
     }
 
     float rotation;
 
-    protected void drawScene() {
+    void createLists() {
+        firstDisplayList = glGenLists(2);
         // table
-        glPushMatrix();
-        glScalef(5, 0.2f, 5);
-        tabletopMat.set();
-        cube.draw();
-        glPopMatrix();
+        glNewList(firstDisplayList, GL_COMPILE);
+        {
+            glPushMatrix();
+            glScalef(5, 0.2f, 5);
+            tabletopMat.set();
+            cube.draw();
+            glPopMatrix();
+            glTranslatef(0, 3, 0);
+        }
+        glEndList();
 
         // brick
-        glPushMatrix();
-        glTranslatef(0, 3, 0);
+        glNewList(firstDisplayList + 1, GL_COMPILE);
+        {
+            cubeMat.set();
+            cube.draw();
+        }
+        glEndList();
+    }
+
+    protected void drawScene() {
+        glCallList(firstDisplayList);
         glRotatef(rotation, 0, 1, 1);
-        cubeMat.set();
-        cube.draw();
-        glPopMatrix();
+        glCallList(firstDisplayList + 1);
     }
 
     @Override
     protected void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        lookAt(cameraPos, cameraUpV);
 
         drawScene();
     }
