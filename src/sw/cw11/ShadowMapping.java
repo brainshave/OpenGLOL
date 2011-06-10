@@ -21,8 +21,8 @@ public class ShadowMapping extends GLBaza {
 
 
     Material cubeMat, tabletopMat;
-    float[] lightPos = {0, 10, 0, 1};
-    float[] lightUpV = {0, 0, 1};
+    float[] lightPos = {-3, 10, -3, 1};
+    float[] lightUpV = {1, 0, 0};
     float[] cameraPos = {0, 6, 6, 1};
     float[] cameraUpV = {0, 1, 0};
     private int shadowMapTexture;
@@ -56,13 +56,15 @@ public class ShadowMapping extends GLBaza {
     @Override
     protected void init() {
         Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE});
-        //glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
         //glEnable(GL_CULL_FACE);
+        //glCullFace(GL_FRONT);
         //glEnable(GL_COLOR_MATERIAL);
         //glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
         //glShadeModel(GL_SMOOTH);
-        glDepthFunc(GL11.GL_LEQUAL);
+        glDepthFunc(GL_LEQUAL);
+        glAlphaFunc(GL_GEQUAL, 0.99f);
 
         glColor4f(1, 1, 1, 1);
         glClearColor(0, 0, 0, 0);
@@ -76,7 +78,7 @@ public class ShadowMapping extends GLBaza {
         });
         dim = new Light(GL_LIGHT0, new float[][]{
                 {0, 0, 0, 1},
-                {0.3f, 0.3f, 0.3f, 1},
+                {0.4f, 0.4f, 0.4f, 1},
                 {0, 0, 0, 1},
                 lightPos
         });
@@ -102,7 +104,7 @@ public class ShadowMapping extends GLBaza {
     private void createShadowMapTexture() {
         shadowMapTexture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+        glTexImage2D(GL_TEXTURE_2D, 0, ARBDepthTexture.GL_DEPTH_COMPONENT32_ARB,
                 shadowMapSize, shadowMapSize, 0, GL_DEPTH_COMPONENT,
                 GL_UNSIGNED_BYTE, (ByteBuffer) null);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -116,12 +118,12 @@ public class ShadowMapping extends GLBaza {
         lightViewMat.rewind();
         cameraProjMat.rewind();
         cameraViewMat.rewind();
-        Utils.initPerspective(this, 3, 10);
+        Utils.initPerspective(this, 3, 9f);
         lookAt(lightPos, lightUpV);
         glGetFloat(GL_PROJECTION_MATRIX, lightProjMat);
         glGetFloat(GL_MODELVIEW_MATRIX, lightViewMat);
 
-        Utils.initPerspective(this, 1.3f, 100);
+        Utils.initPerspective(this, 1.5f, 10);
         lookAt(cameraPos, cameraUpV);
         glGetFloat(GL_PROJECTION_MATRIX, cameraProjMat);
         glGetFloat(GL_MODELVIEW_MATRIX, cameraViewMat);
@@ -171,20 +173,35 @@ public class ShadowMapping extends GLBaza {
         glTexGen(GL_Q, GL_EYE_PLANE, textureMatrixRows[3]);
 
         glTexParameteri(GL_TEXTURE_2D, ARBShadow.GL_TEXTURE_COMPARE_MODE_ARB, ARBShadow.GL_COMPARE_R_TO_TEXTURE_ARB);
-        glTexParameteri(GL_TEXTURE_2D, ARBShadow.GL_TEXTURE_COMPARE_FUNC_ARB, GL11.GL_LEQUAL);
+        glTexParameteri(GL_TEXTURE_2D, ARBShadow.GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
         glTexParameteri(GL_TEXTURE_2D, ARBDepthTexture.GL_DEPTH_TEXTURE_MODE_ARB, GL_INTENSITY);
+        //glTexParameteri(GL_TEXTURE_2D, ARBDepthTexture.GL_TEXTURE_DEPTH_SIZE_ARB, 32);
 
     }
 
     @Override
     protected void input() {
         while (Keyboard.next()) {
-            lit = !Keyboard.getEventKeyState();
+            boolean state = !Keyboard.getEventKeyState();
+            switch (Keyboard.getEventKey()) {
+                case Keyboard.KEY_SPACE:
+                    lit = state;
+                    break;
+                case Keyboard.KEY_R:
+                    rotate = state;
+                    break;
+                case Keyboard.KEY_LEFT:
+                    rotation += 1;
+                    break;
+                case Keyboard.KEY_RIGHT:
+                    rotation -= 1;
+            }
         }
     }
 
     float rotation;
     boolean lit = true;
+    boolean rotate = true;
 
     void createLists() {
         firstDisplayList = glGenLists(2);
@@ -221,7 +238,6 @@ public class ShadowMapping extends GLBaza {
 
     @Override
     protected void render() {
-        //saveMatrices();
         glClear(GL_DEPTH_BUFFER_BIT);
 
         // 1. Light's point of view
@@ -232,8 +248,8 @@ public class ShadowMapping extends GLBaza {
         glShadeModel(GL_FLAT);
         glColorMask(false, false, false, false);
 
-        glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
         drawScene();
+//        glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
         glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, shadowMapSize, shadowMapSize);
 
         // Revert state
@@ -242,14 +258,16 @@ public class ShadowMapping extends GLBaza {
         glViewport(0, 0, width, height);
 
         // 2. Dim-lit scene from eye perspective
-        loadMatrices(cameraProjMat, cameraViewMat);
-        dim.on();
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        loadMatrices(cameraProjMat, cameraViewMat);
+
+
+        dim.on();
         drawScene();
 
         // 3. Bright-lit scene with mask
         Utils.enable(textureGenerators);
-        glAlphaFunc(GL_GEQUAL, 0.99f);
+        //saveMatrices();
         if (lit) bright.on();
         drawScene();
         Utils.disable(textureGenerators);
@@ -261,7 +279,7 @@ public class ShadowMapping extends GLBaza {
     @Override
     protected void logic() {
         Utils.sleep60Hz();
-        rotation = ((float) (System.currentTimeMillis() % term) / term) * 360;
+        if (rotate) rotation = ((float) (System.currentTimeMillis() % term) / term) * 360;
     }
 
     public static void main(String[] args) {
