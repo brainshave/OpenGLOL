@@ -21,7 +21,7 @@ public class ShadowMapping extends GLBaza {
 
 
     Material cubeMat, tabletopMat;
-    float[] lightPos = {-3, 10, -3, 1};
+    float[] lightPos = {-3, 20, -3, 1};
     float[] lightUpV = {1, 0, 0};
     float[] cameraPos = {0, 6, 6, 1};
     float[] cameraUpV = {0, 1, 0};
@@ -61,6 +61,8 @@ public class ShadowMapping extends GLBaza {
         //glCullFace(GL_FRONT);
         //glEnable(GL_COLOR_MATERIAL);
         //glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+        glPolygonOffset(1,1);
+        glEnable(GL_POLYGON_OFFSET_FILL);
 
         //glShadeModel(GL_SMOOTH);
         glDepthFunc(GL_LEQUAL);
@@ -118,7 +120,7 @@ public class ShadowMapping extends GLBaza {
         lightViewMat.rewind();
         cameraProjMat.rewind();
         cameraViewMat.rewind();
-        Utils.initPerspective(this, 3, 9f);
+        Utils.initPerspective(this, 8f, 20f);
         lookAt(lightPos, lightUpV);
         glGetFloat(GL_PROJECTION_MATRIX, lightProjMat);
         glGetFloat(GL_MODELVIEW_MATRIX, lightViewMat);
@@ -146,7 +148,7 @@ public class ShadowMapping extends GLBaza {
 
         Matrix4f textureMatrix = new Matrix4f();
         Matrix4f.mul(Matrix4f.mul(biasMatrix, lightPro, null), lightView, textureMatrix);
-        //Matrix4f.mul(Matrix4f.mul(lightPro, lightView, null), biasMatrix, textureMatrix);
+        //Matrix4f.mul(Matrix4f.mul(lightView, lightPro, null), biasMatrix, textureMatrix);
 
         FloatBuffer texMatBuff = BufferUtils.createFloatBuffer(16);
         texMatBuff.rewind();
@@ -174,27 +176,26 @@ public class ShadowMapping extends GLBaza {
 
         glTexParameteri(GL_TEXTURE_2D, ARBShadow.GL_TEXTURE_COMPARE_MODE_ARB, ARBShadow.GL_COMPARE_R_TO_TEXTURE_ARB);
         glTexParameteri(GL_TEXTURE_2D, ARBShadow.GL_TEXTURE_COMPARE_FUNC_ARB, GL_LEQUAL);
-        glTexParameteri(GL_TEXTURE_2D, ARBDepthTexture.GL_DEPTH_TEXTURE_MODE_ARB, GL_INTENSITY);
-        //glTexParameteri(GL_TEXTURE_2D, ARBDepthTexture.GL_TEXTURE_DEPTH_SIZE_ARB, 32);
-
+        glTexParameteri(GL_TEXTURE_2D, ARBDepthTexture.GL_DEPTH_TEXTURE_MODE_ARB, GL_ALPHA);
     }
 
     @Override
     protected void input() {
         while (Keyboard.next()) {
-            boolean state = !Keyboard.getEventKeyState();
-            switch (Keyboard.getEventKey()) {
-                case Keyboard.KEY_SPACE:
-                    lit = state;
-                    break;
-                case Keyboard.KEY_R:
-                    rotate = state;
-                    break;
-                case Keyboard.KEY_LEFT:
-                    rotation += 1;
-                    break;
-                case Keyboard.KEY_RIGHT:
-                    rotation -= 1;
+            if (Keyboard.getEventKeyState()) {
+                switch (Keyboard.getEventKey()) {
+                    case Keyboard.KEY_SPACE:
+                        lit = !lit;
+                        break;
+                    case Keyboard.KEY_R:
+                        rotate = !rotate;
+                        break;
+                    case Keyboard.KEY_LEFT:
+                        rotation += 1;
+                        break;
+                    case Keyboard.KEY_RIGHT:
+                        rotation -= 1;
+                }
             }
         }
     }
@@ -258,17 +259,15 @@ public class ShadowMapping extends GLBaza {
         glViewport(0, 0, width, height);
 
         // 2. Dim-lit scene from eye perspective
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         loadMatrices(cameraProjMat, cameraViewMat);
-
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         dim.on();
         drawScene();
 
         // 3. Bright-lit scene with mask
-        Utils.enable(textureGenerators);
-        //saveMatrices();
         if (lit) bright.on();
+        Utils.enable(textureGenerators);
         drawScene();
         Utils.disable(textureGenerators);
     }
