@@ -1,15 +1,12 @@
 package sw.zal;
 
-import com.sun.deploy.panel.ITreeNode;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 import sw.utils.*;
 
 import java.io.File;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 /**
@@ -93,18 +90,6 @@ public class Compounds extends GLBaza {
         glRotatef(viewRotationY, 0, 1, 0);
         drawScene(true);
         glPopMatrix();
-
-//        glPushMatrix();
-//        glRotatef(rotationX, 1, 0, 0);
-//        glRotatef(rotationY, 0, 1, 0);
-//        textureAggregator.resetTexturePointer();
-//        glTranslatef(-3, 0, 0);
-//        ShapeCombinations.RECURRENT.draw(drawables[0], numberOfCompounds);
-//        glTranslatef(6, 0, 0);
-//        ShapeCombinations.RECURRENT.draw(drawables[1], numberOfCompounds);
-//        textureAggregator.nextTexture();
-//
-//        glPopMatrix();
     }
 
     int term = 5000;

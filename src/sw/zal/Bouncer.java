@@ -1,9 +1,5 @@
 package sw.zal;
 
-import org.lwjgl.util.vector.Vector3f;
-
-import java.io.PipedOutputStream;
-
 /**
  * Created by IntelliJ IDEA.
  * User: SW
