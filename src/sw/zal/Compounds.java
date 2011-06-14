@@ -22,7 +22,7 @@ public class Compounds extends GLBaza {
     Cube room;
     int roomTexture;
     Drawable[] drawables;
-    Bouncer bouncer = new Bouncer(new float[]{0,0,0}, new float[]{1,0.2f,0.3f}, 1, 4);
+    Bouncer bouncer = new Bouncer(new float[]{0,0,0}, new float[]{1,0.2f,0.3f}, (float) Math.sqrt(2), 4);
     TextureAggregator textureAggregator;
     Light bright;
     Material material;

@@ -9,7 +9,6 @@ import java.io.PipedOutputStream;
  * User: SW
  * Date: 14.06.11
  * Time: 18:36
- * To change this template use File | Settings | File Templates.
  */
 public class Bouncer {
     float[] pos;
