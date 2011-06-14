@@ -11,6 +11,7 @@ import static org.lwjgl.opengl.GL15.*;
 public class Cube extends Shape {
     private int buffer;
     private int count;
+    private boolean invertNormals;
 
     public Cube() {
         create(glGenBuffers());
@@ -18,6 +19,11 @@ public class Cube extends Shape {
 
     public Cube(int buffer) {
         create(buffer);
+    }
+
+    public Cube(boolean invertNormals) {
+        this.invertNormals = true;
+        create(glGenBuffers());
     }
 
     protected void create(int buffer) {
@@ -34,7 +40,7 @@ public class Cube extends Shape {
         int texCoordPtr = 0;
         for (int V = -1; V <= 1; V += 2) {
             float[] vec = {V, V, V};
-            float[] norm = {0, 0, V};
+            float[] norm = {0, 0, (invertNormals ? -V : V)};
             cube.put(texCoords[texCoordPtr]).put(norm).put(vec);
             texCoordPtr = (texCoordPtr + 1) % 4;
             for (int i = 0; i < 11; ++i) {
@@ -42,8 +48,8 @@ public class Cube extends Shape {
                 vec[index] = -vec[index];
 
                 // these checks are changing normative vectors when current wall changes.
-                if (i == 3) norm = new float[]{0, V, 0};
-                else if (i == 7) norm = new float[]{V, 0, 0};
+                if (i == 3) norm = new float[]{0, (invertNormals ? -V : V), 0};
+                else if (i == 7) norm = new float[]{(invertNormals ? -V : V), 0, 0};
                 cube.put(texCoords[texCoordPtr]).put(norm).put(vec);
                 texCoordPtr = (texCoordPtr + 1) % 4;
             }
