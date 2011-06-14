@@ -11,7 +11,7 @@ import sw.utils.Drawable;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public enum TetrahedronCombinations {
+public enum ShapeCombinations {
     SIMPLE {
         @Override
         public void draw(Drawable shape, int n) {

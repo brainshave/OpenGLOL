@@ -84,10 +84,10 @@ public class Compounds extends GLBaza {
         glRotatef(rotationX, 1, 0, 0);
         glRotatef(rotationY, 0, 1, 0);
         textureAggregator.resetTexturePointer();
-        glTranslatef(-3, 0,0);
-        TetrahedronCombinations.RECURRENT.draw(drawables[0], numberOfCompounds);
-        glTranslatef(6,0,0);
-        TetrahedronCombinations.RECURRENT.draw(drawables[1], numberOfCompounds);
+        glTranslatef(-3, 0, 0);
+        ShapeCombinations.RECURRENT.draw(drawables[0], numberOfCompounds);
+        glTranslatef(6, 0, 0);
+        ShapeCombinations.RECURRENT.draw(drawables[1], numberOfCompounds);
         textureAggregator.nextTexture();
 
         glPopMatrix();
