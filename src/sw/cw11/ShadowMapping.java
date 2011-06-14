@@ -4,7 +4,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.ARBDepthTexture;
 import org.lwjgl.opengl.ARBShadow;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import sw.utils.*;
 
@@ -55,16 +54,9 @@ public class ShadowMapping extends GLBaza {
 
     @Override
     protected void init() {
-        Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE});
+        Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE, GL_POLYGON_OFFSET_FILL});
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-        //glEnable(GL_CULL_FACE);
-        //glCullFace(GL_FRONT);
-        //glEnable(GL_COLOR_MATERIAL);
-        //glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-        glPolygonOffset(1,1);
-        glEnable(GL_POLYGON_OFFSET_FILL);
 
-        //glShadeModel(GL_SMOOTH);
         glDepthFunc(GL_LEQUAL);
         glAlphaFunc(GL_GEQUAL, 0.99f);
 
@@ -148,7 +140,6 @@ public class ShadowMapping extends GLBaza {
 
         Matrix4f textureMatrix = new Matrix4f();
         Matrix4f.mul(Matrix4f.mul(biasMatrix, lightPro, null), lightView, textureMatrix);
-        //Matrix4f.mul(Matrix4f.mul(lightView, lightPro, null), biasMatrix, textureMatrix);
 
         FloatBuffer texMatBuff = BufferUtils.createFloatBuffer(16);
         texMatBuff.rewind();
@@ -250,7 +241,6 @@ public class ShadowMapping extends GLBaza {
         glColorMask(false, false, false, false);
 
         drawScene();
-//        glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
         glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, shadowMapSize, shadowMapSize);
 
         // Revert state
@@ -262,12 +252,14 @@ public class ShadowMapping extends GLBaza {
         loadMatrices(cameraProjMat, cameraViewMat);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+        glPolygonOffset(1,3);
         dim.on();
         drawScene();
 
         // 3. Bright-lit scene with mask
         if (lit) bright.on();
         Utils.enable(textureGenerators);
+        glPolygonOffset(1,0);
         drawScene();
         Utils.disable(textureGenerators);
     }
