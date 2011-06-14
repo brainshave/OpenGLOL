@@ -2,9 +2,11 @@ package sw.zal;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import sun.rmi.runtime.NewThreadAction;
 import sw.utils.*;
 
 import java.io.File;
+import java.util.Random;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.gluLookAt;
@@ -19,7 +21,9 @@ public class Compounds extends GLBaza {
     Cube room;
     int roomTexture;
     Drawable[] drawables;
-    Bouncer bouncer = new Bouncer(new float[]{0,0,0}, new float[]{1,0.2f,0.3f}, (float) Math.sqrt(2), 4);
+    Bouncer[] bouncers;
+    ShapeCombinations[] shapeCombinations;
+    int[] numbersOfCompounds;
     TextureAggregator textureAggregator;
     Light bright;
     Material material;
@@ -47,20 +51,37 @@ public class Compounds extends GLBaza {
         glBindTexture(GL_TEXTURE_2D, roomTexture);
         Utils.texture(new File("tekstury/P5_t.png"));
 
-        drawables = new Drawable[]{new Tetrahedron(), new Cube()};
+        Random rand = new Random();
+        drawables = new Drawable[rand.nextInt(11) + 2];
+        bouncers = new Bouncer[drawables.length];
+        shapeCombinations = new ShapeCombinations[drawables.length];
+        numbersOfCompounds = new int[drawables.length];
+
+        ShapeCombinations[] possibleShapeCombinations = ShapeCombinations.values();
+        for (int i = 0; i < drawables.length; ++i) {
+            drawables[i] = rand.nextBoolean() ? new Tetrahedron() : new Cube();
+            bouncers[i] = new Bouncer(
+                    new float[]{0, 0, 0},
+                    new float[]{rand.nextFloat(), rand.nextFloat(), rand.nextFloat()},
+                    (float) Math.sqrt(2) / 2,
+                    4);
+            shapeCombinations[i] = possibleShapeCombinations[rand.nextInt(possibleShapeCombinations.length)];
+            numbersOfCompounds[i] = rand.nextInt(4) + 1;
+        }
+
         textureAggregator = new TextureAggregator(new File("tekstury"));
 
         material.set();
         bright.on();
     }
 
-    float rotationY;
+    float rotation;
     float rotationX;
     float viewRotationX;
     float viewRotationY;
     boolean lit = true;
     boolean rotate = true;
-    int numberOfCompounds = 2;
+    int numberOfCompounds = 0;
 
     private void drawScene(boolean doTextures) {
 
@@ -75,11 +96,16 @@ public class Compounds extends GLBaza {
             textureAggregator.nextTexture();
         }
 
-        glPushMatrix();
-        float[] pos = bouncer.increment(0.1f);
-        glTranslatef(pos[0], pos[1], pos[2]);
-        ShapeCombinations.RECURRENT.draw(drawables[0], numberOfCompounds);
-        glPopMatrix();
+        for (int i = 0; i < drawables.length; ++i) {
+            glPushMatrix();
+            float[] pos = bouncers[i].increment(0.1f);
+            glTranslatef(pos[0], pos[1], pos[2]);
+            glRotatef(rotation, 0, 1, 1);
+            glScalef(0.5f, 0.5f, 0.5f);
+            shapeCombinations[i].draw(drawables[i], numbersOfCompounds[i] + numberOfCompounds);
+            if(doTextures) textureAggregator.nextTexture();
+            glPopMatrix();
+        }
     }
 
     @Override
@@ -92,12 +118,12 @@ public class Compounds extends GLBaza {
         glPopMatrix();
     }
 
-    int term = 5000;
+    int term = 4000;
 
     @Override
     protected void logic() {
         Utils.sleep60Hz();
-        if (rotate) rotationY = ((float) (System.currentTimeMillis() % term) / term) * 360;
+        if (rotate) rotation = ((float) (System.currentTimeMillis() % term) / term) * 360;
     }
 
 
@@ -113,10 +139,10 @@ public class Compounds extends GLBaza {
                         rotate = !rotate;
                         break;
                     case Keyboard.KEY_LEFT:
-                        rotationY += 10;
+                        rotation += 10;
                         break;
                     case Keyboard.KEY_RIGHT:
-                        rotationY -= 10;
+                        rotation -= 10;
                         break;
                     case Keyboard.KEY_UP:
                         rotationX += 10;
