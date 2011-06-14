@@ -135,7 +135,7 @@ public class SphereMap extends GLBaza {
         });
         gluLookAt(0, 0, 4, 0, 0, 0, 0, 1, 0);
 
-        textures = Tetrahedron.textures(new File[]{new File("tekstury/BG.png"), new File("tekstury/Reflect.png")});
+        textures = Utils.textures(new File[]{new File("tekstury/BG.png"), new File("tekstury/Reflect.png")});
         glTexGenf(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
         glTexGenf(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 

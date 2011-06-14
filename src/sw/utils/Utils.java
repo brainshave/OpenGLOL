@@ -2,7 +2,10 @@ package sw.utils;
 
 import org.lwjgl.BufferUtils;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -134,5 +137,35 @@ public class Utils {
         for (int flag : disables) {
             glDisable(flag);
         }
+    }
+
+    public static IntBuffer textures(File[] files) {
+        IntBuffer ts = BufferUtils.createIntBuffer(files.length);
+        ts.rewind();
+        glEnable(GL_TEXTURE_2D);
+
+        glGenTextures(ts);
+        for (int i = 0; i < files.length; ++i) {
+            glBindTexture(GL_TEXTURE_2D, ts.get(i));
+            texture(files[i]);
+        }
+
+        ts.limit(files.length);
+        return ts;
+    }
+
+    public static void texture(File file) {
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        ByteBuffer bb = imageDataUpsideDown(img);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.getWidth(), img.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, bb);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 }
