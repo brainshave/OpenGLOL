@@ -60,11 +60,15 @@ public class ShadowMappingUtils {
         glTexImage2D(GL_TEXTURE_2D, 0, ARBDepthTexture.GL_DEPTH_COMPONENT32_ARB,
                 size, size, 0, GL_DEPTH_COMPONENT,
                 GL_UNSIGNED_BYTE, (ByteBuffer) null);
+        setShadowMapTextureParams();
+        return texture;
+    }
+
+    public static void setShadowMapTextureParams() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        return texture;
     }
 
     public static void setTextureGenerationVectors(FloatBuffer lightProjection, FloatBuffer lightModelView) {

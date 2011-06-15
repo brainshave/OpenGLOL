@@ -28,7 +28,7 @@ public class NarrowRoom extends GLBaza implements Scene {
 
     @Override
     protected void init() {
-        Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE, GL_TEXTURE_2D, GL_POLYGON_OFFSET_FILL, GL_ALPHA_TEST});
+        Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE, GL_POLYGON_OFFSET_FILL});
 
         glShadeModel(GL_SMOOTH);
         glColor4f(1, 1, 1, 1);
@@ -38,7 +38,7 @@ public class NarrowRoom extends GLBaza implements Scene {
                 {0.7f, 0.7f, 0.7f, 0.7f},
                 {0, 0, 0, 0}
         });
-        room = new Cube(true);
+        room = new Cube(false);
         roomTexture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, roomTexture);
         Utils.texture(new File("tekstury/P5_t.png"));
@@ -61,15 +61,16 @@ public class NarrowRoom extends GLBaza implements Scene {
             numbersOfCompounds[i] = rand.nextInt(2) + 1;
         }
 
-        textureAggregator = new TextureAggregator(new File("tekstury"));
-
         //Utils.initPerspective(this, 0.7f, 12);
         //gluLookAt(0, 0, -4.3f, 0, 0, 0, 0, 1, 0);
         renderer = new SceneWithShadowRenderer(
                 this, 512, 0.7f, 12,
                 new float[]{0, 0, -4.3f}, new float[]{0, 0, 0}, new float[]{0, 1, 0},
-                GL_LIGHT0, 2.1f, 20,
-                new float[]{0, 6f, 0, 1}, new float[]{0, 0, 0}, new float[]{0, 0, 1});
+                GL_LIGHT0, 4, 25f,
+                new float[]{0, 20f, 0, 1}, new float[]{0, 0, 0}, new float[]{0, 0, 1}
+        );
+
+        textureAggregator = new TextureAggregator(new File("tekstury"));
 
         material.set();
     }
