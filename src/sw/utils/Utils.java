@@ -125,6 +125,8 @@ public class Utils {
         }
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+
+
     }
     
     public static void initPerspective(GLBaza program, float near, float far) {

@@ -1,6 +1,7 @@
 package sw.utils;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 
 import java.nio.FloatBuffer;
 
@@ -53,7 +54,7 @@ public class SceneWithShadowRenderer {
             Scene scene, int shadowMapSize,
             float cameraNear, float cameraFar,
             float[] cameraPos, float[] cameraAt, float[] cameraUp,
-            float lightNear, float lightFar,
+            int lightName, float lightNear, float lightFar,
             float[] lightPos, float[] lightAt, float[] lightUp) {
         this.scene = scene;
         this.shadowMapSize = shadowMapSize;
@@ -68,13 +69,13 @@ public class SceneWithShadowRenderer {
         this.lightAt = lightAt;
         this.lightUp = lightUp;
 
-        this.bright = new Light(GL_LIGHT0, new float[][]{
+        this.bright = new Light(lightName, new float[][]{
                 {1, 1, 1, 1},
                 {1, 1, 1, 1},
                 {1, 1, 1, 1},
                 lightPos
         });
-        this.dim = new Light(GL_LIGHT0, new float[][]{
+        this.dim = new Light(lightName, new float[][]{
                 {0, 0, 0, 1},
                 {0.4f, 0.4f, 0.4f, 1},
                 {0, 0, 0, 1},
@@ -96,6 +97,9 @@ public class SceneWithShadowRenderer {
         glDepthFunc(GL_LEQUAL);
         glAlphaFunc(GL_GEQUAL, 0.99f);
 
+        glColor4f(1, 1, 1, 1);
+        glClearColor(0, 0, 0, 0);
+
         shadowMapTexture = createShadowMapTexture(shadowMapSize);
 
         lightProjectionMatrix.rewind();
@@ -111,7 +115,10 @@ public class SceneWithShadowRenderer {
         setTextureGeneration();
     }
 
-    int[] textureGenerators = {GL_TEXTURE_GEN_S, GL_TEXTURE_GEN_T, GL_TEXTURE_GEN_R, GL_TEXTURE_GEN_Q, GL_TEXTURE_2D, GL_ALPHA_TEST, GL_LIGHTING};
+    private int[] texGens = {
+            GL_TEXTURE_GEN_S, GL_TEXTURE_GEN_T, GL_TEXTURE_GEN_R,
+            GL_TEXTURE_GEN_Q};
+    private int[] textureGenerators = { GL_TEXTURE_2D, GL_ALPHA_TEST, GL_LIGHTING };
 
     public void render(boolean lit) {
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -125,6 +132,7 @@ public class SceneWithShadowRenderer {
         glColorMask(false, false, false, false);
 
         scene.drawScene(false);
+        glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
         glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, shadowMapSize, shadowMapSize);
 
         // Revert state
@@ -133,8 +141,8 @@ public class SceneWithShadowRenderer {
         glViewport(0, 0, scene.getWidth(), scene.getHeight());
 
         // 2. Dim-lit scene from eye perspective
-        loadMatrices(cameraProjectionMatrix, cameraModelViewMatrix);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        loadMatrices(cameraProjectionMatrix, cameraModelViewMatrix);
 
         glPolygonOffset(1, 3);
         dim.on();
@@ -142,9 +150,31 @@ public class SceneWithShadowRenderer {
 
         // 3. Bright-lit scene with mask
         if (lit) bright.on();
+        glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
         Utils.enable(textureGenerators);
+        Utils.enable(texGens);
         glPolygonOffset(1, 0);
         scene.drawScene(true);
         Utils.disable(textureGenerators);
+        Utils.disable(texGens);
+    }
+
+    public void renderFromLightPerspective() {
+       glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        loadMatrices(lightProjectionMatrix, lightModelViewMatrix);
+
+        //glPolygonOffset(1, 1);
+        dim.on();
+        scene.drawScene(false);
+
+        // 3. Bright-lit scene with mask
+        bright.on();
+        //glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
+        //Utils.enable(textureGenerators);
+        //Utils.enable(texGens);
+        //glPolygonOffset(1, 0);
+        scene.drawScene(false);
+        Utils.disable(textureGenerators);
+        Utils.disable(texGens);
     }
 }

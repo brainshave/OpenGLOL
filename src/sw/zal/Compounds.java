@@ -25,22 +25,16 @@ public class Compounds extends GLBaza implements Scene {
     ShapeCombinations[] shapeCombinations;
     int[] numbersOfCompounds;
     TextureAggregator textureAggregator;
-    Light bright;
+    SceneWithShadowRenderer renderer;
     Material material;
-
-    float[] lightPos = {0, 4, 0, 1};
 
     @Override
     protected void init() {
-        Utils.initPerspective(this, 0.7f, 12);
         Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE, GL_TEXTURE_2D, GL_POLYGON_OFFSET_FILL, GL_ALPHA_TEST});
-
-        gluLookAt(0, 0, -4.3f, 0, 0, 0, 0, 1, 0);
 
         glShadeModel(GL_SMOOTH);
         glColor4f(1, 1, 1, 1);
         glClearColor(0, 0, 0, 0);
-        bright = new Light(GL_LIGHT0, lightPos);
         material = new Material(1, new float[][]{
                 {0.2f, 0.2f, 0.2f, 0.2f},
                 {0.7f, 0.7f, 0.7f, 0.7f},
@@ -66,13 +60,20 @@ public class Compounds extends GLBaza implements Scene {
                     (float) Math.sqrt(2) / 2,
                     4);
             shapeCombinations[i] = possibleShapeCombinations[rand.nextInt(possibleShapeCombinations.length)];
-            numbersOfCompounds[i] = rand.nextInt(4) + 1;
+            numbersOfCompounds[i] = rand.nextInt(2) + 1;
         }
 
         textureAggregator = new TextureAggregator(new File("tekstury"));
 
+        //Utils.initPerspective(this, 0.7f, 12);
+        //gluLookAt(0, 0, -4.3f, 0, 0, 0, 0, 1, 0);
+        renderer = new SceneWithShadowRenderer(
+                this, 512, 0.7f, 12,
+                new float[]{0, 0, -4.3f}, new float[]{0, 0, 0}, new float[]{0, 1, 0},
+                GL_LIGHT0, 2.1f, 20,
+                new float[]{0, 6f, 0, 1}, new float[]{0, 0, 0}, new float[]{0, 0, 1});
+
         material.set();
-        bright.on();
     }
 
     float rotation;
@@ -84,16 +85,21 @@ public class Compounds extends GLBaza implements Scene {
     int numberOfCompounds = 0;
 
     public void drawScene(boolean observerMode) {
+        glPushMatrix();
+        if (observerMode) {
+            glRotatef(viewRotationX, 1, 0, 0);
+            glRotatef(viewRotationY, 0, 1, 0);
+        }
 
         glPushMatrix();
         glScalef(4f, 4f, 4f);
-        if (observerMode) glBindTexture(GL_TEXTURE_2D, roomTexture);
+        //if (observerMode) glBindTexture(GL_TEXTURE_2D, roomTexture);
         room.draw();
         glPopMatrix();
 
         if (observerMode) {
-            textureAggregator.resetTexturePointer();
-            textureAggregator.nextTexture();
+            //textureAggregator.resetTexturePointer();
+            //textureAggregator.nextTexture();
         }
 
         for (int i = 0; i < drawables.length; ++i) {
@@ -103,19 +109,17 @@ public class Compounds extends GLBaza implements Scene {
             glRotatef(rotation, 0, 1, 1);
             glScalef(0.5f, 0.5f, 0.5f);
             shapeCombinations[i].draw(drawables[i], numbersOfCompounds[i] + numberOfCompounds);
-            if(observerMode) textureAggregator.nextTexture();
+            //if (observerMode) textureAggregator.nextTexture();
             glPopMatrix();
         }
+        glPopMatrix();
     }
 
     @Override
     protected void render() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glPushMatrix();
-        glRotatef(viewRotationX, 1, 0, 0);
-        glRotatef(viewRotationY, 0, 1, 0);
-        drawScene(true);
-        glPopMatrix();
+        renderer.render(lit);
+        //renderer.renderFromLightPerspective();
+        //drawScene(true);
     }
 
     int term = 4000;
@@ -123,7 +127,8 @@ public class Compounds extends GLBaza implements Scene {
     @Override
     protected void logic() {
         Utils.sleep60Hz();
-        if (rotate) rotation = ((float) (System.currentTimeMillis() % term) / term) * 360;
+        if (rotate)
+            rotation = ((float) (System.currentTimeMillis() % term) / term) * 360;
     }
 
 
