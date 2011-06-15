@@ -252,14 +252,14 @@ public class ShadowMapping extends GLBaza {
         loadMatrices(cameraProjMat, cameraViewMat);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-        glPolygonOffset(1,3);
+        glPolygonOffset(1, 3);
         dim.on();
         drawScene();
 
         // 3. Bright-lit scene with mask
         if (lit) bright.on();
         Utils.enable(textureGenerators);
-        glPolygonOffset(1,0);
+        glPolygonOffset(1, 0);
         drawScene();
         Utils.disable(textureGenerators);
     }
@@ -270,7 +270,8 @@ public class ShadowMapping extends GLBaza {
     @Override
     protected void logic() {
         Utils.sleep60Hz();
-        if (rotate) rotation = ((float) (System.currentTimeMillis() % term) / term) * 360;
+        if (rotate)
+            rotation = ((float) (System.currentTimeMillis() % term) / term) * 360;
     }
 
     public static void main(String[] args) {

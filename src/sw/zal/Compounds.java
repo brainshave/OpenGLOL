@@ -17,7 +17,7 @@ import static org.lwjgl.util.glu.GLU.gluLookAt;
  * Date: 14.06.11
  * Time: 09:22
  */
-public class Compounds extends GLBaza {
+public class Compounds extends GLBaza implements Scene {
     Cube room;
     int roomTexture;
     Drawable[] drawables;
@@ -83,15 +83,15 @@ public class Compounds extends GLBaza {
     boolean rotate = true;
     int numberOfCompounds = 0;
 
-    private void drawScene(boolean doTextures) {
+    public void drawScene(boolean observerMode) {
 
         glPushMatrix();
         glScalef(4f, 4f, 4f);
-        if (doTextures) glBindTexture(GL_TEXTURE_2D, roomTexture);
+        if (observerMode) glBindTexture(GL_TEXTURE_2D, roomTexture);
         room.draw();
         glPopMatrix();
 
-        if (doTextures) {
+        if (observerMode) {
             textureAggregator.resetTexturePointer();
             textureAggregator.nextTexture();
         }
@@ -103,7 +103,7 @@ public class Compounds extends GLBaza {
             glRotatef(rotation, 0, 1, 1);
             glScalef(0.5f, 0.5f, 0.5f);
             shapeCombinations[i].draw(drawables[i], numbersOfCompounds[i] + numberOfCompounds);
-            if(doTextures) textureAggregator.nextTexture();
+            if(observerMode) textureAggregator.nextTexture();
             glPopMatrix();
         }
     }
@@ -165,6 +165,13 @@ public class Compounds extends GLBaza {
         viewRotationX = 360 * (float) (Mouse.getY() - height / 2) / height;
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
 
     public static void main(String[] args) {
         new Compounds().start();

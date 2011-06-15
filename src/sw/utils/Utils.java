@@ -112,18 +112,23 @@ public class Utils {
         return bb;
     }
 
-    public static void initPerspective(GLBaza program, float near, float far) {
+    public static void initPerspective(int windowWidth, int windowHeight, float near, float far) {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         float size = 1;
-        if (program.width > program.height) {
-            glFrustum(-size * (float) program.width / program.height,
-                    size * (float) program.width / program.height, -size, size, near, far);
+        if (windowWidth > windowHeight) {
+            glFrustum(-size * (float) windowWidth / windowHeight,
+                    size * (float) windowWidth / windowHeight, -size, size, near, far);
         } else {
-            glFrustum(-size, size, -size * (float) program.height / program.width,
-                    size * (float) program.height / program.width, near, far);
+            glFrustum(-size, size, -size * (float) windowHeight / windowWidth,
+                    size * (float) windowHeight / windowWidth, near, far);
         }
         glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+    }
+    
+    public static void initPerspective(GLBaza program, float near, float far) {
+        initPerspective(program.width, program.height, near, far);
     }
 
     public static void enable(int[] enables) {
