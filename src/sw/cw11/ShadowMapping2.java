@@ -1,7 +1,6 @@
 package sw.cw11;
 
 import org.lwjgl.input.Keyboard;
-import sun.rmi.runtime.NewThreadAction;
 import sw.utils.*;
 
 import static org.lwjgl.opengl.GL11.*;

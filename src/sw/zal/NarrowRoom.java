@@ -2,14 +2,12 @@ package sw.zal;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import sun.rmi.runtime.NewThreadAction;
 import sw.utils.*;
 
 import java.io.File;
 import java.util.Random;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.util.glu.GLU.gluLookAt;
 
 /**
  * Created by IntelliJ IDEA.
@@ -17,7 +15,7 @@ import static org.lwjgl.util.glu.GLU.gluLookAt;
  * Date: 14.06.11
  * Time: 09:22
  */
-public class Compounds extends GLBaza implements Scene {
+public class NarrowRoom extends GLBaza implements Scene {
     Cube room;
     int roomTexture;
     Drawable[] drawables;
@@ -93,13 +91,13 @@ public class Compounds extends GLBaza implements Scene {
 
         glPushMatrix();
         glScalef(4f, 4f, 4f);
-        //if (observerMode) glBindTexture(GL_TEXTURE_2D, roomTexture);
+        if (observerMode) glBindTexture(GL_TEXTURE_2D, roomTexture);
         room.draw();
         glPopMatrix();
 
         if (observerMode) {
-            //textureAggregator.resetTexturePointer();
-            //textureAggregator.nextTexture();
+            textureAggregator.resetTexturePointer();
+            textureAggregator.nextTexture();
         }
 
         for (int i = 0; i < drawables.length; ++i) {
@@ -109,7 +107,7 @@ public class Compounds extends GLBaza implements Scene {
             glRotatef(rotation, 0, 1, 1);
             glScalef(0.5f, 0.5f, 0.5f);
             shapeCombinations[i].draw(drawables[i], numbersOfCompounds[i] + numberOfCompounds);
-            //if (observerMode) textureAggregator.nextTexture();
+            if (observerMode) textureAggregator.nextTexture();
             glPopMatrix();
         }
         glPopMatrix();
@@ -179,6 +177,6 @@ public class Compounds extends GLBaza implements Scene {
     }
 
     public static void main(String[] args) {
-        new Compounds().start();
+        new NarrowRoom().start();
     }
 }
