@@ -2,12 +2,15 @@ package sw.zal;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 import sw.utils.*;
 
 import java.io.File;
 import java.util.Random;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.util.glu.GLU.gluLookAt;
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,22 +26,23 @@ public class NarrowRoom extends GLBaza implements Scene {
     ShapeCombinations[] shapeCombinations;
     int[] numbersOfCompounds;
     TextureAggregator textureAggregator;
-    SceneWithShadowRenderer renderer;
+    Light light;
     Material material;
 
     @Override
     protected void init() {
-        Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE, GL_POLYGON_OFFSET_FILL});
+        Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE, GL_POLYGON_OFFSET_FILL, GL_TEXTURE_2D});
 
         glShadeModel(GL_SMOOTH);
         glColor4f(1, 1, 1, 1);
         glClearColor(0, 0, 0, 0);
+        light = new Light(GL_LIGHT0, new float[]{0, 4, 0, 1});
         material = new Material(1, new float[][]{
                 {0.2f, 0.2f, 0.2f, 0.2f},
                 {0.7f, 0.7f, 0.7f, 0.7f},
                 {0, 0, 0, 0}
         });
-        room = new Cube(false);
+        room = new Cube(true);
         roomTexture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, roomTexture);
         Utils.texture(new File("tekstury/P5_t.png"));
@@ -61,17 +65,18 @@ public class NarrowRoom extends GLBaza implements Scene {
             numbersOfCompounds[i] = rand.nextInt(2) + 1;
         }
 
-        //Utils.initPerspective(this, 0.7f, 12);
-        //gluLookAt(0, 0, -4.3f, 0, 0, 0, 0, 1, 0);
-        renderer = new SceneWithShadowRenderer(
-                this, 512, 0.7f, 12,
-                new float[]{0, 0, -4.3f}, new float[]{0, 0, 0}, new float[]{0, 1, 0},
-                GL_LIGHT0, 4, 25f,
-                new float[]{0, 20f, 0, 1}, new float[]{0, 0, 0}, new float[]{0, 0, 1}
-        );
+        Utils.initPerspective(this, 0.7f, 12);
+        gluLookAt(0, 0, -4.3f, 0, 0, 0, 0, 1, 0);
+//        renderer = new SceneWithShadowRenderer(
+//                this, 512, 0.7f, 12,
+//                new float[]{0, 0, -4.3f}, new float[]{0, 0, 0}, new float[]{0, 1, 0},
+//                GL_LIGHT0, 4, 25f,
+//                new float[]{0, 20f, 0, 1}, new float[]{0, 0, 0}, new float[]{0, 0, 1}
+//        );
 
         textureAggregator = new TextureAggregator(new File("tekstury"));
 
+        light.on();
         material.set();
     }
 
@@ -116,9 +121,10 @@ public class NarrowRoom extends GLBaza implements Scene {
 
     @Override
     protected void render() {
-        renderer.render(lit);
+        //renderer.render(lit);
         //renderer.renderFromLightPerspective();
-        //drawScene(true);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        drawScene(true);
     }
 
     int term = 4000;
@@ -167,6 +173,11 @@ public class NarrowRoom extends GLBaza implements Scene {
         }
         viewRotationY = 360 * (float) (Mouse.getX() - width / 2) / width;
         viewRotationX = 360 * (float) (Mouse.getY() - height / 2) / height;
+    }
+
+
+    public void transformWorld() {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public int getWidth() {
