@@ -89,6 +89,10 @@ public class SceneWithShadowRenderer {
     private FloatBuffer cameraProjectionMatrix = BufferUtils.createFloatBuffer(16);
     private FloatBuffer cameraModelViewMatrix = BufferUtils.createFloatBuffer(16);
 
+
+    private FloatBuffer tmpProjection = BufferUtils.createFloatBuffer(16);
+    private FloatBuffer tmpModelView = BufferUtils.createFloatBuffer(16);
+
     private void init() {
         Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE, GL_POLYGON_OFFSET_FILL});
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
@@ -106,7 +110,7 @@ public class SceneWithShadowRenderer {
         lightModelViewMatrix.rewind();
         cameraProjectionMatrix.rewind();
         cameraModelViewMatrix.rewind();
-        setMatrices(scene.getWidth(), scene.getHeight(), lightNear, lightFar, lightPos, lightAt, lightUp);
+        setMatrices(shadowMapSize, shadowMapSize, lightNear, lightFar, lightPos, lightAt, lightUp);
         saveMatrices(lightProjectionMatrix, lightModelViewMatrix);
         setMatrices(scene.getWidth(), scene.getHeight(), cameraNear, cameraFar, cameraPos, cameraAt, cameraUp);
         saveMatrices(cameraProjectionMatrix, cameraModelViewMatrix);
@@ -123,11 +127,13 @@ public class SceneWithShadowRenderer {
             GL_TEXTURE_2D, GL_ALPHA_TEST, GL_LIGHTING};
 
     public void render(boolean lit) {
-        glClear(GL_DEPTH_BUFFER_BIT);
 
         // 1. Light's point of view
         loadMatrices(lightProjectionMatrix, lightModelViewMatrix);
         glViewport(0, 0, shadowMapSize, shadowMapSize);
+//        glScalef(-1, -1, -1);
+        scene.transformWorld();
+//        glScalef(-1, -1, -1);
 
         glShadeModel(GL_FLAT);
         glColorMask(false, false, false, false);
@@ -144,6 +150,7 @@ public class SceneWithShadowRenderer {
         // 2. Dim-lit scene from eye perspective
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         loadMatrices(cameraProjectionMatrix, cameraModelViewMatrix);
+        scene.transformWorld();
 
         Utils.enable(textureAndLighting);
         //glPolygonOffset(1, 3);
@@ -164,7 +171,7 @@ public class SceneWithShadowRenderer {
         glViewport(0, 0, shadowMapSize, shadowMapSize);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         loadMatrices(lightProjectionMatrix, lightModelViewMatrix);
-
+        scene.transformWorld();
         //glPolygonOffset(1, 1);
         dim.on();
         scene.drawScene(pass);

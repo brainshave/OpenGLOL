@@ -4,6 +4,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.ARBDepthTexture;
 import org.lwjgl.opengl.ARBShadow;
 import org.lwjgl.util.vector.Matrix4f;
+import sun.reflect.generics.tree.VoidDescriptor;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -35,6 +36,10 @@ public class ShadowMappingUtils {
             int width, int height, float near, float far,
             float[] pos, float[] at, float[] up) {
         Utils.initPerspective(width, height, near, far);
+        lookAt(pos, at, up);
+    }
+
+    public static void lookAt(float[] pos, float[] at, float[] up) {
         gluLookAt(pos[0], pos[1], pos[2], at[0], at[1], at[2], up[0], up[1], up[2]);
     }
 

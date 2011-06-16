@@ -1,5 +1,7 @@
 package sw.utils;
 
+import sun.reflect.generics.tree.VoidDescriptor;
+
 /**
  * Created by IntelliJ IDEA.
  * User: SW
@@ -13,6 +15,7 @@ public interface Scene {
      * @param observerMode if true perform transformations on view and use textures in client code.
      */
     public void drawScene(boolean observerMode);
+    public void transformWorld();
     public int getWidth();
     public int getHeight();
 }

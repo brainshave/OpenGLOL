@@ -29,15 +29,16 @@ public class NarrowRoomTake2 extends GLBaza implements Scene {
     float cameraFar = 13;
     float[] cameraPos = {0, 0, 5, 1};
     float[] cameraUpV = {0, 1, 0};
-    float[] lightPos = {0, 20f, 0, 1};
-    float[] lightUpV = {1, 0, 0};
-    float lightNear = 16.1f;
-    float lightFar = 25;
+    float[] lightPos = {0, 5f, 0, 1};
+    float[] lightUpV = {0, 0, 1};
+    float lightNear = 1.4f;
+    float lightFar = 13;
 
     float rotation;
     boolean lit = true;
     boolean rotate = true;
     boolean camera = true;
+    boolean objects = true;
     int term = 5000;
     private int numberOfCompounds = 0;
     private float viewRotationY = 0;
@@ -88,11 +89,6 @@ public class NarrowRoomTake2 extends GLBaza implements Scene {
     public void drawScene(boolean observerMode) {
         glPushMatrix();
         {
-            if (observerMode) {
-                glRotatef(viewRotationX, 1, 0, 0);
-                glRotatef(viewRotationY, 0, 1, 0);
-            }
-
             glPushMatrix();
             {
                 glScalef(4f, 4f, 4f);
@@ -103,18 +99,25 @@ public class NarrowRoomTake2 extends GLBaza implements Scene {
 
             cubeMat.set();
 
-            for (int i = 0; i < drawables.length; ++i) {
-                glPushMatrix();
-                float[] pos = bouncers[i].increment(0.01f);
-                glTranslatef(pos[0], pos[1], pos[2]);
-                glRotatef(rotation, 0, 1, 1);
-                glScalef(0.5f, 0.5f, 0.5f);
-                shapeCombinations[i].draw(drawables[i], numbersOfCompounds[i] + numberOfCompounds);
-                //if (observerMode) textureAggregator.nextTexture();
-                glPopMatrix();
+            if (objects) {
+                for (int i = 0; i < drawables.length; ++i) {
+                    glPushMatrix();
+                    float[] pos = bouncers[i].increment(0.01f);
+                    glTranslatef(pos[0], pos[1], pos[2]);
+                    glRotatef(rotation, 0, 1, 1);
+                    glScalef(0.5f, 0.5f, 0.5f);
+                    shapeCombinations[i].draw(drawables[i], numbersOfCompounds[i] + numberOfCompounds);
+                    //if (observerMode) textureAggregator.nextTexture();
+                    glPopMatrix();
+                }
             }
         }
         glPopMatrix();
+    }
+
+    public void transformWorld() {
+        glRotatef(viewRotationX, 1, 0, 0);
+        glRotatef(viewRotationY, 0, 1, 0);
     }
 
 
@@ -131,6 +134,9 @@ public class NarrowRoomTake2 extends GLBaza implements Scene {
                         break;
                     case Keyboard.KEY_C:
                         camera = !camera;
+                        break;
+                    case Keyboard.KEY_O:
+                        objects = !objects;
                         break;
                     case Keyboard.KEY_LEFT:
                         rotation += 1;

@@ -88,6 +88,10 @@ public class ShadowMapping2 extends GLBaza implements Scene {
         glPopMatrix();
     }
 
+    public void transformWorld() {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
 
     @Override
     protected void input() {
