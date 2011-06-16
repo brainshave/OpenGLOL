@@ -57,7 +57,7 @@ public class ShadowMappingUtils {
     public static int createShadowMapTexture(int size) {
         int texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, ARBDepthTexture.GL_DEPTH_COMPONENT32_ARB,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
                 size, size, 0, GL_DEPTH_COMPONENT,
                 GL_UNSIGNED_BYTE, (ByteBuffer) null);
         setShadowMapTextureParams();

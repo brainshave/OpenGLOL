@@ -94,10 +94,11 @@ public class SceneWithShadowRenderer {
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
         glDepthFunc(GL_LEQUAL);
-        //glAlphaFunc(GL_GEQUAL, 0.99f);
+        glAlphaFunc(GL_GEQUAL, 0.99f);
 
         glColor4f(1, 1, 1, 1);
         glClearColor(0, 0, 0, 0);
+        glPolygonOffset(1, 1);
 
         shadowMapTexture = createShadowMapTexture(shadowMapSize);
 
@@ -112,6 +113,7 @@ public class SceneWithShadowRenderer {
 
         setTextureGenerationVectors(lightProjectionMatrix, lightModelViewMatrix);
         setTextureGeneration();
+
     }
 
     private int[] texGens = {
@@ -144,33 +146,33 @@ public class SceneWithShadowRenderer {
         loadMatrices(cameraProjectionMatrix, cameraModelViewMatrix);
 
         Utils.enable(textureAndLighting);
-        glPolygonOffset(1, 3);
+        //glPolygonOffset(1, 3);
         dim.on();
         scene.drawScene(true);
 
         // 3. Bright-lit scene with mask
         if (lit) bright.on();
         glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
-        //Utils.enable(texGens);
-        glPolygonOffset(1, 0);
+        Utils.enable(texGens);
+
         scene.drawScene(true);
         Utils.disable(texGens);
         Utils.disable(textureAndLighting);
     }
 
-    public void renderFromLightPerspective() {
+    public void renderFromLightPerspective(boolean pass) {
         glViewport(0, 0, shadowMapSize, shadowMapSize);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         loadMatrices(lightProjectionMatrix, lightModelViewMatrix);
 
         //glPolygonOffset(1, 1);
-        bright.on();
-        scene.drawScene(false);
-
         dim.on();
+        scene.drawScene(pass);
+
+        bright.on();
         //Utils.enable(textureAndLighting);
         //Utils.enable(texGens);
-        scene.drawScene(false);
+        scene.drawScene(pass);
         //Utils.disable(textureAndLighting);
         //Utils.disable(texGens);
 

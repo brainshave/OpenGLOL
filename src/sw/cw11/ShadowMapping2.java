@@ -112,7 +112,7 @@ public class ShadowMapping2 extends GLBaza implements Scene {
 
     @Override
     protected void render() {
-        renderer.render(true);
+        renderer.render(lit);
     }
 
     @Override
