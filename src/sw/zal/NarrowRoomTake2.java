@@ -2,11 +2,14 @@ package sw.zal;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 import sw.utils.*;
 
+import java.io.File;
 import java.util.Random;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,13 +29,13 @@ public class NarrowRoomTake2 extends GLBaza implements Scene {
     Material cubeMat, tabletopMat;
     float[] lookingAt = {0, 0, 0};
     float cameraNear = 1.4f;
-    float cameraFar = 13;
+    float cameraFar = 12;
     float[] cameraPos = {0, 0, 5, 1};
     float[] cameraUpV = {0, 1, 0};
-    float[] lightPos = {0, 5f, 0, 1};
+    float[] lightPos = {0, 8f, 0, 1};
     float[] lightUpV = {0, 0, 1};
-    float lightNear = 1.4f;
-    float lightFar = 13;
+    float lightNear = 1f;
+    float lightFar = 100;
 
     float rotation;
     boolean lit = true;
@@ -43,6 +46,7 @@ public class NarrowRoomTake2 extends GLBaza implements Scene {
     private int numberOfCompounds = 0;
     private float viewRotationY = 0;
     private float viewRotationX = 0;
+    private int roomTexture;
 
 
     @Override
@@ -54,10 +58,14 @@ public class NarrowRoomTake2 extends GLBaza implements Scene {
                 lightPos, lookingAt, lightUpV);
 
         cube = new Cube(true);
+        //glActiveTexture(GL_TEXTURE0);
+        roomTexture = glGenTextures();
+        //glBindTexture(GL_TEXTURE_2D, roomTexture);
+        //Utils.texture(new File("tekstury/P5_t.png"));
         cubeMat = new Material(120, new float[][]{
                 {0, 0.2f, 0.2f, 1},
                 {0, 1, 1, 1},
-                {1, 1, 1, 1,}
+                {1, 1, 1, 1}
         });
         tabletopMat = new Material(1, new float[][]{
                 {0, 0.1f, 0, 1},
@@ -89,14 +97,18 @@ public class NarrowRoomTake2 extends GLBaza implements Scene {
     public void drawScene(boolean observerMode) {
         glPushMatrix();
         {
-            glPushMatrix();
-            {
-                glScalef(4f, 4f, 4f);
-                tabletopMat.set();
-                cube.draw();
+            if (observerMode) {
+                glPushMatrix();
+                {
+                    glScalef(4f, 4f, 4f);
+                    tabletopMat.set();
+                    cube.draw();
+                }
+                glPopMatrix();
             }
-            glPopMatrix();
 
+            ////glActiveTexture(GL_TEXTURE0);
+            //glBindTexture(GL11.GL_TEXTURE_2D, roomTexture);
             cubeMat.set();
 
             if (objects) {
@@ -104,7 +116,7 @@ public class NarrowRoomTake2 extends GLBaza implements Scene {
                     glPushMatrix();
                     float[] pos = bouncers[i].increment(0.01f);
                     glTranslatef(pos[0], pos[1], pos[2]);
-                    glRotatef(rotation, 0, 1, 1);
+                    glRotatef(rotation * numbersOfCompounds[i], 0, 1, 1);
                     glScalef(0.5f, 0.5f, 0.5f);
                     shapeCombinations[i].draw(drawables[i], numbersOfCompounds[i] + numberOfCompounds);
                     //if (observerMode) textureAggregator.nextTexture();

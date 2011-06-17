@@ -22,9 +22,9 @@ public class ShadowMapping2 extends GLBaza implements Scene {
     float cameraFar = 10;
     float[] cameraPos = {0, 6, 6, 1};
     float[] cameraUpV = {0, 1, 0};
-    float[] lightPos = {-3, 20, -3, 1};
+    float[] lightPos = {0, 20, 0, 1};
     float[] lightUpV = {1, 0, 0};
-    float lightNear = 8;
+    float lightNear = 5;
     float lightFar = 20;
 
     float rotation;

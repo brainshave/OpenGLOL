@@ -1,10 +1,12 @@
 package sw.utils;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL13;
 
 import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 import static sw.utils.ShadowMappingUtils.*;
 
 /**
@@ -94,7 +96,7 @@ public class SceneWithShadowRenderer {
     private FloatBuffer tmpModelView = BufferUtils.createFloatBuffer(16);
 
     private void init() {
-        Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE, GL_POLYGON_OFFSET_FILL});
+        Utils.enable(new int[]{GL_DEPTH_TEST, GL_NORMALIZE});
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
         glDepthFunc(GL_LEQUAL);
@@ -102,8 +104,9 @@ public class SceneWithShadowRenderer {
 
         glColor4f(1, 1, 1, 1);
         glClearColor(0, 0, 0, 0);
-        glPolygonOffset(1, 1);
+        //glPolygonOffset(1, 1);
 
+        //glActiveTexture(GL_TEXTURE1);
         shadowMapTexture = createShadowMapTexture(shadowMapSize);
 
         lightProjectionMatrix.rewind();
@@ -132,13 +135,14 @@ public class SceneWithShadowRenderer {
         loadMatrices(lightProjectionMatrix, lightModelViewMatrix);
         glViewport(0, 0, shadowMapSize, shadowMapSize);
 //        glScalef(-1, -1, -1);
-        scene.transformWorld();
+        //scene.transformWorld();
 //        glScalef(-1, -1, -1);
 
         glShadeModel(GL_FLAT);
         glColorMask(false, false, false, false);
 
         scene.drawScene(false);
+        //glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
         glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, shadowMapSize, shadowMapSize);
 
@@ -152,17 +156,22 @@ public class SceneWithShadowRenderer {
         loadMatrices(cameraProjectionMatrix, cameraModelViewMatrix);
         scene.transformWorld();
 
+
+        //glActiveTexture(GL_TEXTURE1);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
         Utils.enable(textureAndLighting);
-        //glPolygonOffset(1, 3);
+        glPolygonOffset(1, 3);
         dim.on();
         scene.drawScene(true);
 
         // 3. Bright-lit scene with mask
         if (lit) bright.on();
-        glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
         Utils.enable(texGens);
 
+        glPolygonOffset(1,1);
         scene.drawScene(true);
+        glDisable(GL_POLYGON_OFFSET_FILL);
         Utils.disable(texGens);
         Utils.disable(textureAndLighting);
     }
