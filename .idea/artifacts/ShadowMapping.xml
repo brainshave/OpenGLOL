@@ -3,10 +3,9 @@
     <output-path>$PROJECT_DIR$/</output-path>
     <root id="archive" name="ShadowMapping.jar">
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/metainfs/ShadowMapping/MANIFEST.MF" />
       </element>
       <element id="module-output" name="ZajeciaGL" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl-2.7.1/jar/AppleJavaExtensions.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl-2.7.1/jar/jinput.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl-2.7.1/jar/lwjgl.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../lwjgl-2.7.1/jar/lwjgl_util.jar" path-in-jar="/" />
